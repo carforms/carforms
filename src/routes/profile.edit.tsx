@@ -1,0 +1,103 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/profile/edit")({
+  component: EditProfilePage,
+});
+
+function EditProfilePage() {
+  const { user, profile, loading, refreshProfile } = useAuth();
+  const navigate = useNavigate();
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+  const [location, setLocation] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/login" });
+  }, [loading, user, navigate]);
+
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name ?? "");
+      setBio(profile.bio ?? "");
+      setLocation(profile.location ?? "");
+      setAvatarUrl(profile.avatar_url);
+    }
+  }, [profile]);
+
+  const onAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (error) return toast.error(error.message);
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    setAvatarUrl(data.publicUrl);
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: displayName, bio, location, avatar_url: avatarUrl })
+      .eq("id", user.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Gespeichert");
+    await refreshProfile();
+    if (profile?.username) navigate({ to: "/profile/$username", params: { username: profile.username } });
+  };
+
+  return (
+    <main className="mx-auto max-w-xl px-4 py-8">
+      <h1 className="text-2xl font-bold">Profil bearbeiten</h1>
+      <form onSubmit={save} className="mt-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src={avatarUrl ?? undefined} />
+            <AvatarFallback>{profile?.username?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
+          </Avatar>
+          <label className="cursor-pointer">
+            <span className="inline-flex items-center justify-center rounded-full border border-border bg-secondary px-4 py-2 text-sm hover:bg-accent">
+              Avatar ändern
+            </span>
+            <input type="file" accept="image/*" className="hidden" onChange={onAvatar} />
+          </label>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Username</Label>
+          <Input value={profile?.username ?? ""} disabled />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="dn">Anzeigename</Label>
+          <Input id="dn" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={60} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="bio">Bio</Label>
+          <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} maxLength={200} rows={3} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="loc">Standort</Label>
+          <Input id="loc" value={location} onChange={(e) => setLocation(e.target.value)} maxLength={80} />
+        </div>
+        <Button type="submit" className="w-full rounded-full" disabled={saving}>
+          {saving ? "Speichere…" : "Speichern"}
+        </Button>
+      </form>
+    </main>
+  );
+}
