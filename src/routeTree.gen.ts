@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as IndexRouteImport } from './routes/index'
@@ -21,6 +22,11 @@ import { Route as CommunitiesSlugRouteImport } from './routes/communities.$slug'
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/new': typeof PostNewRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/new': typeof PostNewRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/new': typeof PostNewRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/communities'
     | '/login'
+    | '/search'
     | '/signup'
     | '/communities/$slug'
     | '/post/new'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/communities'
     | '/login'
+    | '/search'
     | '/signup'
     | '/communities/$slug'
     | '/post/new'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/communities'
     | '/login'
+    | '/search'
     | '/signup'
     | '/communities/$slug'
     | '/post/new'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunitiesRoute: typeof CommunitiesRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
   PostNewRoute: typeof PostNewRoute
   ProfileUsernameRoute: typeof ProfileUsernameRoute
@@ -140,6 +153,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -210,6 +230,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunitiesRoute: CommunitiesRouteWithChildren,
   LoginRoute: LoginRoute,
+  SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
   PostNewRoute: PostNewRoute,
   ProfileUsernameRoute: ProfileUsernameRoute,
