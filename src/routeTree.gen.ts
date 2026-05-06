@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CommunitiesSlugRouteImport } from './routes/communities.$slug'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -34,37 +35,51 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunitiesSlugRoute = CommunitiesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CommunitiesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/communities': typeof CommunitiesRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/communities/$slug': typeof CommunitiesSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/communities': typeof CommunitiesRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/communities/$slug': typeof CommunitiesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/communities': typeof CommunitiesRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/communities/$slug': typeof CommunitiesSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/communities' | '/login' | '/signup'
+  fullPaths: '/' | '/communities' | '/login' | '/signup' | '/communities/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/communities' | '/login' | '/signup'
-  id: '__root__' | '/' | '/communities' | '/login' | '/signup'
+  to: '/' | '/communities' | '/login' | '/signup' | '/communities/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/communities'
+    | '/login'
+    | '/signup'
+    | '/communities/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CommunitiesRoute: typeof CommunitiesRoute
+  CommunitiesRoute: typeof CommunitiesRouteWithChildren
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
 }
@@ -99,12 +114,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communities/$slug': {
+      id: '/communities/$slug'
+      path: '/$slug'
+      fullPath: '/communities/$slug'
+      preLoaderRoute: typeof CommunitiesSlugRouteImport
+      parentRoute: typeof CommunitiesRoute
+    }
   }
 }
 
+interface CommunitiesRouteChildren {
+  CommunitiesSlugRoute: typeof CommunitiesSlugRoute
+}
+
+const CommunitiesRouteChildren: CommunitiesRouteChildren = {
+  CommunitiesSlugRoute: CommunitiesSlugRoute,
+}
+
+const CommunitiesRouteWithChildren = CommunitiesRoute._addFileChildren(
+  CommunitiesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CommunitiesRoute: CommunitiesRoute,
+  CommunitiesRoute: CommunitiesRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
 }
