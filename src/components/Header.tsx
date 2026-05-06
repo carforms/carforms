@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import logoUrl from "@/assets/logo-carforms.jpg";
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
@@ -20,8 +21,12 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
-        <Link to="/" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card text-sm font-bold tracking-tight">
-          CF
+        <Link to="/" aria-label="carforms — Startseite" className="flex h-10 shrink-0 items-center">
+          <img
+            src={logoUrl}
+            alt="carforms"
+            className="h-10 w-auto rounded-md bg-white object-contain p-1"
+          />
         </Link>
 
         <form
