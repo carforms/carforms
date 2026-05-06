@@ -15,6 +15,7 @@ import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
+import { Route as PostNewRouteImport } from './routes/post.new'
 import { Route as CommunitiesSlugRouteImport } from './routes/communities.$slug'
 
 const SignupRoute = SignupRouteImport.update({
@@ -47,6 +48,11 @@ const ProfileUsernameRoute = ProfileUsernameRouteImport.update({
   path: '/profile/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PostNewRoute = PostNewRouteImport.update({
+  id: '/post/new',
+  path: '/post/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunitiesSlugRoute = CommunitiesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
+  '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
   '/profile/edit': typeof ProfileEditRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
+  '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
   '/profile/edit': typeof ProfileEditRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
+  '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
   '/profile/edit': typeof ProfileEditRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/communities/$slug'
+    | '/post/new'
     | '/profile/$username'
     | '/profile/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/communities/$slug'
+    | '/post/new'
     | '/profile/$username'
     | '/profile/edit'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/communities/$slug'
+    | '/post/new'
     | '/profile/$username'
     | '/profile/edit'
   fileRoutesById: FileRoutesById
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   CommunitiesRoute: typeof CommunitiesRouteWithChildren
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  PostNewRoute: typeof PostNewRoute
   ProfileUsernameRoute: typeof ProfileUsernameRoute
   ProfileEditRoute: typeof ProfileEditRoute
 }
@@ -164,6 +177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/post/new': {
+      id: '/post/new'
+      path: '/post/new'
+      fullPath: '/post/new'
+      preLoaderRoute: typeof PostNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/communities/$slug': {
       id: '/communities/$slug'
       path: '/$slug'
@@ -191,6 +211,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunitiesRoute: CommunitiesRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  PostNewRoute: PostNewRoute,
   ProfileUsernameRoute: ProfileUsernameRoute,
   ProfileEditRoute: ProfileEditRoute,
 }
