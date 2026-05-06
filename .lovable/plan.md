@@ -1,48 +1,21 @@
-# carforms — Plan
+## Logo oben links einbauen
 
-Eine dunkle, moderne Community-Plattform für Auto-Enthusiasten (inspiriert von den hochgeladenen Screenshots). Voll funktional mit Login, eigenen Profilen, Posts (Feed) und Communities.
+Das hochgeladene CF-Auto-Logo (`IMG_7822.JPG`) ersetzt den aktuellen Text-Platzhalter „CF" in der Kopfzeile und bleibt wie bisher per Klick mit der Startseite verlinkt.
 
-## Design
-- Dunkles Theme (fast schwarz `#0a0a0a`), runde Karten, weiche Glass/Hover-Effekte
-- Sans-serif (Inter), Akzentfarbe dezentes Weiß/Hellgrau, später anpassbar
-- Logo-Wortmarke „carforms" + CF-Monogramm
+### Schritte
 
-## Seitenstruktur (TanStack Routes)
-- `/` — Feed (Posts-Stream wie Bild 3) + Top-Header mit Suche
-- `/communities` — Community-Karten-Grid (Bild 2) inkl. „Beitreten"/„Mitglied"
-- `/communities/$slug` — Community-Detailseite mit Posts
-- `/profile/$username` — Profilseite (Bild 1) mit Stats, Bio, Beitragsraster
-- `/profile/edit` — Profil bearbeiten
-- `/post/new` — Neuen Beitrag erstellen (Bild + Titel)
-- `/login`, `/signup`, `/reset-password` — Auth-Seiten
-- `/_authenticated` Layout schützt persönliche Routen
+1. **Logo ins Projekt kopieren**
+   - `user-uploads://IMG_7822.JPG` → `src/assets/logo-carforms.png`
+   - Speicherort `src/assets/` ermöglicht optimiertes Bundling über den ES-Import.
 
-## Features (Phase 1)
-1. **Auth** (Lovable Cloud): E-Mail/Passwort + Google OAuth
-2. **Profile**: Username, Bio, Standort, Avatar; Stats (Posts, Follower, Folgende, Gruppen)
-3. **Posts**: Bild-Upload (Storage), Titel, Likes, Kommentare
-4. **Communities**: erstellen, beitreten/verlassen, Mitgliederzahl
-5. **Feed**: Posts der gefolgten User + beigetretener Communities
-6. **Suche**: einfache Volltextsuche (Posts, User, Communities)
+2. **Header anpassen** (`src/components/Header.tsx`)
+   - Import hinzufügen: `import logoUrl from "@/assets/logo-carforms.png";`
+   - Den `<Link to="/">`-Block ersetzen: statt des „CF"-Textes ein `<img src={logoUrl} alt="carforms" />`.
+   - Logo wird auf eine angenehme Höhe skaliert (`h-9 w-auto`), Klick führt weiterhin zu `/`.
+   - Da die Datei einen weißen Hintergrund hat, dezentes Helligkeits-Tweak via Tailwind (z. B. `object-contain`) – der dunkle Header zeigt das schwarze Logo dann auf weißem Mini-Plate. Falls gewünscht, kann das Logo später als reines SVG/PNG mit transparentem Hintergrund nachgereicht werden.
 
-## Datenbank (Supabase / Lovable Cloud)
-- `profiles` (id ↔ auth.users, username, display_name, bio, location, avatar_url)
-- `posts` (id, author_id, community_id?, image_url, title, created_at)
-- `post_likes` (post_id, user_id)
-- `post_comments` (id, post_id, user_id, body, created_at)
-- `communities` (id, slug, name, description, cover_url, created_by)
-- `community_members` (community_id, user_id, role)
-- `follows` (follower_id, following_id)
-- `user_roles` + `has_role()` (für spätere Admin-Funktionen, RLS-sicher)
-- Storage-Buckets: `avatars`, `posts`, `communities`
-- RLS-Policies auf allen Tabellen; Trigger erstellt Profil bei Signup
+3. **Favicon / Meta** (optional in diesem Schritt)
+   - Vorerst keine Favicon-Änderung – nur das sichtbare Header-Logo wird ersetzt.
 
-## Technik
-- TanStack Start + Tailwind + shadcn/ui (bereits vorhanden)
-- `createServerFn` + `requireSupabaseAuth` für geschützte Reads/Writes
-- Browser-Client für Auth-Listener und Realtime (Likes/Kommentare später)
-
-## Hinweis zur Umsetzung
-Phase 1 liefert die komplette UI aller drei Screens + Auth + DB-Schema + Kern-CRUD (Profil, Post erstellen, Community beitreten, Feed). Erweiterungen (Follow-System UI, Realtime, Notifications, Werkstätten/Services aus der Suchleiste) folgen in späteren Iterationen — bitte sag Bescheid, wenn du sie früher willst.
-
-Mit „Approve" starte ich die Implementierung.
+### Ergebnis
+Oben links erscheint das Auto-„CF"-Logo statt der Textmarke; Klick darauf öffnet `/` (Home).
