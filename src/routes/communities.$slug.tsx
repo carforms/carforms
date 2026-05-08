@@ -106,15 +106,15 @@ function CommunityDetail() {
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {posts.map((p) => (
             <li key={p.id} className="overflow-hidden rounded-xl border border-border/60 bg-card">
-              {p.image_url && <img src={p.image_url} alt={p.title ?? ""} className="aspect-square w-full object-cover" />}
-              <div className="p-3">
-                <p className="truncate text-sm font-medium">{p.title ?? "Beitrag"}</p>
-                {p.profiles && (
-                  <Link to="/profile/$username" params={{ username: p.profiles.username }} className="text-xs text-muted-foreground hover:underline">
-                    @{p.profiles.username}
-                  </Link>
-                )}
-              </div>
+              <Link to="/post/$postId" params={{ postId: p.id }} className="block hover:opacity-90 transition-opacity">
+                {p.image_url && <img src={p.image_url} alt={p.title ?? ""} className="aspect-square w-full object-cover" />}
+                <div className="p-3">
+                  <p className="truncate text-sm font-medium">{p.title ?? "Beitrag"}</p>
+                  {p.profiles && (
+                    <span className="text-xs text-muted-foreground">@{p.profiles.username}</span>
+                  )}
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
