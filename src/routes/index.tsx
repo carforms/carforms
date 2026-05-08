@@ -174,91 +174,91 @@ function FeedPage() {
             return (
               <li
                 key={p.id}
-                className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-border hover:shadow-md"
+                className="group cursor-pointer overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-border hover:shadow-md"
               >
-                {/* Stretched link covering the whole card */}
                 <Link
                   to="/post/$postId"
                   params={{ postId: p.id }}
                   aria-label={p.title ?? "Beitrag öffnen"}
-                  className="absolute inset-0 z-10"
-                />
-
-                <div className="relative z-20 flex items-center gap-3 p-4">
-                  <Link
-                    to="/profile/$username"
-                    params={{ username }}
+                  className="block"
+                >
+                  <div
+                    className="flex items-center gap-3 p-4"
                     onClick={(e) => e.stopPropagation()}
-                    className="shrink-0"
                   >
-                    <Avatar className="h-9 w-9 transition-transform hover:scale-105">
-                      <AvatarImage src={p.profiles?.avatar_url ?? undefined} />
-                      <AvatarFallback>{username[0]?.toUpperCase() ?? "U"}</AvatarFallback>
-                    </Avatar>
-                  </Link>
-                  <div className="min-w-0">
                     <Link
                       to="/profile/$username"
                       params={{ username }}
                       onClick={(e) => e.stopPropagation()}
-                      className="block truncate text-sm font-medium hover:underline"
+                      className="shrink-0"
                     >
-                      @{username}
+                      <Avatar className="h-9 w-9 transition-transform hover:scale-105">
+                        <AvatarImage src={p.profiles?.avatar_url ?? undefined} />
+                        <AvatarFallback>{username[0]?.toUpperCase() ?? "U"}</AvatarFallback>
+                      </Avatar>
                     </Link>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(p.created_at).toLocaleDateString("de-DE", {
-                        day: "2-digit",
-                        month: "short",
-                      })}
-                    </p>
+                    <div className="min-w-0">
+                      <Link
+                        to="/profile/$username"
+                        params={{ username }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="block truncate text-sm font-medium hover:underline"
+                      >
+                        @{username}
+                      </Link>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(p.created_at).toLocaleDateString("de-DE", {
+                          day: "2-digit",
+                          month: "short",
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                {p.image_url ? (
-                  <img
-                    src={p.image_url}
-                    alt={p.title ?? "Beitrag"}
-                    className="aspect-square w-full object-cover transition-opacity group-hover:opacity-95"
-                    loading="lazy"
-                  />
-                ) : (p.title || p.body) ? (
-                  <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 bg-gradient-to-br from-card to-accent/20 px-6 py-8 text-center">
-                    {p.title && (
-                      <p className="text-xl font-semibold leading-snug group-hover:underline">{p.title}</p>
-                    )}
-                    {p.body && (
-                      <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>
-                    )}
-                  </div>
-                ) : null}
+                  {p.image_url ? (
+                    <img
+                      src={p.image_url}
+                      alt={p.title ?? "Beitrag"}
+                      className="aspect-square w-full object-cover transition-opacity group-hover:opacity-95"
+                      loading="lazy"
+                    />
+                  ) : (p.title || p.body) ? (
+                    <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 bg-gradient-to-br from-card to-accent/20 px-6 py-8 text-center">
+                      {p.title && (
+                        <p className="text-xl font-semibold leading-snug group-hover:underline">{p.title}</p>
+                      )}
+                      {p.body && (
+                        <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>
+                      )}
+                    </div>
+                  ) : null}
 
-                <div className="space-y-3 p-4">
-                  {p.image_url && p.title && (
-                    <p className="font-medium group-hover:underline">{p.title}</p>
-                  )}
-                  {p.image_url && p.body && <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>}
-                  <div className="relative z-20 flex items-center gap-1 pt-1">
-                    <button
-                      type="button"
-                      onClick={(e) => toggleLike(p, e)}
-                      aria-pressed={liked}
-                      aria-label={liked ? "Like entfernen" : "Liken"}
-                      className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground active:scale-95"
-                    >
-                      <Heart className={`h-4 w-4 transition-transform ${liked ? "scale-110 fill-red-500 text-red-500" : ""}`} />
-                      {p.post_likes.length}
-                    </button>
-                    <Link
-                      to="/post/$postId"
-                      params={{ postId: p.id }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      {p.post_comments.length}
-                    </Link>
+                  <div className="space-y-3 p-4">
+                    {p.image_url && p.title && (
+                      <p className="font-medium group-hover:underline">{p.title}</p>
+                    )}
+                    {p.image_url && p.body && <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>}
+                    <div className="flex items-center gap-1 pt-1">
+                      <button
+                        type="button"
+                        onClick={(e) => toggleLike(p, e)}
+                        aria-pressed={liked}
+                        aria-label={liked ? "Like entfernen" : "Liken"}
+                        className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground active:scale-95"
+                      >
+                        <Heart className={`h-4 w-4 transition-transform ${liked ? "scale-110 fill-red-500 text-red-500" : ""}`} />
+                        {p.post_likes.length}
+                      </button>
+                      <span
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        {p.post_comments.length}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </Link>
               </li>
             );
           })}
