@@ -81,7 +81,9 @@ function SearchPage() {
           <ul className="grid grid-cols-3 gap-2">
             {posts.map((p) => (
               <li key={p.id} className="aspect-square overflow-hidden rounded-xl bg-card">
-                {p.image_url ? <img src={p.image_url} alt={p.title ?? ""} className="h-full w-full object-cover" /> : <div className="p-3 text-xs">{p.title}</div>}
+                <Link to="/post/$postId" params={{ postId: p.id }} className="block h-full w-full">
+                  {p.image_url ? <img src={p.image_url} alt={p.title ?? ""} className="h-full w-full object-cover hover:opacity-90 transition-opacity" /> : <div className="p-3 text-xs">{p.title}</div>}
+                </Link>
               </li>
             ))}
           </ul>
