@@ -253,13 +253,34 @@ function PostDetailPage() {
                   </Avatar>
                 </Link>
                 <div className="min-w-0 flex-1 rounded-2xl bg-accent/40 px-3 py-2">
-                  <Link
-                    to="/profile/$username"
-                    params={{ username: c.profiles?.username ?? "" }}
-                    className="text-xs font-semibold hover:underline"
-                  >
-                    @{c.profiles?.username}
-                  </Link>
+                  <div className="flex items-start justify-between gap-2">
+                    <Link
+                      to="/profile/$username"
+                      params={{ username: c.profiles?.username ?? "" }}
+                      className="text-xs font-semibold hover:underline"
+                    >
+                      @{c.profiles?.username}
+                    </Link>
+                    {user?.id === c.user_id && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!confirm("Kommentar wirklich löschen?")) return;
+                          const { error } = await supabase.from("post_comments").delete().eq("id", c.id);
+                          if (error) {
+                            toast.error(toUserMessage(error));
+                          } else {
+                            toast.success("Kommentar gelöscht");
+                            load();
+                          }
+                        }}
+                        aria-label="Kommentar löschen"
+                        className="text-muted-foreground transition-colors hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                   <p className="mt-0.5 whitespace-pre-line text-sm">{c.body}</p>
                 </div>
               </li>
