@@ -188,6 +188,21 @@ function ProfilePage() {
             <Stat n={stats.groups} label="Gruppen" />
           </div>
 
+          {!isMe && (
+            <Button
+              variant={isFollowing ? "secondary" : "default"}
+              className="mt-4 w-full rounded-full sm:w-auto sm:min-w-[200px]"
+              disabled={followBusy}
+              onClick={toggleFollow}
+            >
+              {isFollowing ? (
+                <><UserCheck className="mr-1.5 h-4 w-4" /> Folge ich</>
+              ) : (
+                <><UserPlus className="mr-1.5 h-4 w-4" /> Folgen</>
+              )}
+            </Button>
+          )}
+
           {profile.bio && <p className="mt-4 text-sm">{profile.bio}</p>}
           {profile.location && (
             <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
