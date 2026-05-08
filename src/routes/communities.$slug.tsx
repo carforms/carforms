@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
+import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/communities/$slug")({
   component: CommunityDetail,
@@ -66,9 +68,13 @@ function CommunityDetail() {
   const toggleJoin = async () => {
     if (!user || !community) return;
     if (isMember) {
-      await supabase.from("community_members").delete().eq("community_id", community.id).eq("user_id", user.id);
+      const { error } = await supabase.from("community_members").delete().eq("community_id", community.id).eq("user_id", user.id);
+      if (error) return toast.error(toUserMessage(error));
+      toast.success("Community verlassen.");
     } else {
-      await supabase.from("community_members").insert({ community_id: community.id, user_id: user.id });
+      const { error } = await supabase.from("community_members").insert({ community_id: community.id, user_id: user.id });
+      if (error) return toast.error(toUserMessage(error));
+      toast.success("Community beigetreten!");
     }
     load();
   };
