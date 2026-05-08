@@ -40,6 +40,11 @@ function EditProfilePage() {
   const onAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    const err = validateImageFile(file);
+    if (err) {
+      e.target.value = "";
+      return toast.error(err);
+    }
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
