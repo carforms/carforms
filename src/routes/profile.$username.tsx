@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MapPin, Settings, Share2 } from "lucide-react";
+import { MapPin, Settings, Share2, UserPlus, UserCheck } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/profile/$username")({
   component: ProfilePage,
@@ -29,6 +30,8 @@ function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, groups: 0 });
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -61,6 +64,55 @@ function ProfilePage() {
     })();
   }, [username]);
 
+  useEffect(() => {
+    if (!profile || !user || user.id === profile.id) {
+      setIsFollowing(false);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("follows")
+        .select("follower_id")
+        .eq("follower_id", user.id)
+        .eq("following_id", profile.id)
+        .maybeSingle();
+      setIsFollowing(!!data);
+    })();
+  }, [profile, user]);
+
+  async function toggleFollow() {
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
+    if (!profile) return;
+    setFollowBusy(true);
+    if (isFollowing) {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", user.id)
+        .eq("following_id", profile.id);
+      if (error) {
+        toast.error(toUserMessage(error));
+      } else {
+        setIsFollowing(false);
+        setStats((s) => ({ ...s, followers: Math.max(0, s.followers - 1) }));
+      }
+    } else {
+      const { error } = await supabase
+        .from("follows")
+        .insert({ follower_id: user.id, following_id: profile.id });
+      if (error) {
+        toast.error(toUserMessage(error));
+      } else {
+        setIsFollowing(true);
+        setStats((s) => ({ ...s, followers: s.followers + 1 }));
+      }
+    }
+    setFollowBusy(false);
+  }
+
   if (!profile) {
     return (
       <main className="mx-auto max-w-4xl px-4 py-12 text-center">
@@ -91,7 +143,21 @@ function ProfilePage() {
                   <Settings className="h-4 w-4" />
                 </Button>
               </>
-            ) : null}
+            ) : (
+              <Button
+                size="sm"
+                variant={isFollowing ? "secondary" : "default"}
+                className="rounded-full"
+                disabled={followBusy}
+                onClick={toggleFollow}
+              >
+                {isFollowing ? (
+                  <><UserCheck className="mr-1.5 h-4 w-4" /> Folge ich</>
+                ) : (
+                  <><UserPlus className="mr-1.5 h-4 w-4" /> Folgen</>
+                )}
+              </Button>
+            )}
             <Button
               size="icon"
               variant="secondary"
