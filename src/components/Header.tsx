@@ -120,6 +120,21 @@ export function Header() {
           )}
         </nav>
       </div>
+
+      {mobileSearchOpen && (
+        <div className="border-t border-border/60 bg-background/95 px-4 py-3 md:hidden">
+          <form className="relative" onSubmit={submitSearch}>
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              autoFocus
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Suche, Services, Werkstätten…"
+              className="h-10 w-full rounded-full border border-border/60 bg-card/60 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-border"
+            />
+          </form>
+        </div>
+      )}
     </header>
   );
 }
