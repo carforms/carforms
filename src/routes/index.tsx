@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, RefreshCw } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ function FeedPage() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
     const { data } = await supabase
@@ -44,17 +45,41 @@ function FeedPage() {
   useEffect(() => {
     load();
 
+    let subscribed = false;
     const channel = supabase
       .channel("feed-changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "post_likes" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "post_comments" }, () => load())
-      .subscribe();
+      .subscribe((status) => {
+        console.log("[feed] realtime status:", status);
+        if (status === "SUBSCRIBED") subscribed = true;
+      });
+
+    const fallbackTimer = setTimeout(() => {
+      if (!subscribed) {
+        console.warn("[feed] realtime not subscribed after 3s, falling back to load()");
+        load();
+      }
+    }, 3000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
+      clearTimeout(fallbackTimer);
+      document.removeEventListener("visibilitychange", onVisibility);
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await load();
+    setTimeout(() => setRefreshing(false), 500);
+  };
 
   const toggleLike = async (post: Post, e: React.MouseEvent) => {
     e.stopPropagation();
