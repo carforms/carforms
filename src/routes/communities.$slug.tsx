@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
+import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/communities/$slug")({
   component: CommunityDetail,
