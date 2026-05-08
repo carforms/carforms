@@ -64,6 +64,55 @@ function ProfilePage() {
     })();
   }, [username]);
 
+  useEffect(() => {
+    if (!profile || !user || user.id === profile.id) {
+      setIsFollowing(false);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("follows")
+        .select("follower_id")
+        .eq("follower_id", user.id)
+        .eq("following_id", profile.id)
+        .maybeSingle();
+      setIsFollowing(!!data);
+    })();
+  }, [profile, user]);
+
+  async function toggleFollow() {
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
+    if (!profile) return;
+    setFollowBusy(true);
+    if (isFollowing) {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", user.id)
+        .eq("following_id", profile.id);
+      if (error) {
+        toast.error(toUserMessage(error));
+      } else {
+        setIsFollowing(false);
+        setStats((s) => ({ ...s, followers: Math.max(0, s.followers - 1) }));
+      }
+    } else {
+      const { error } = await supabase
+        .from("follows")
+        .insert({ follower_id: user.id, following_id: profile.id });
+      if (error) {
+        toast.error(toUserMessage(error));
+      } else {
+        setIsFollowing(true);
+        setStats((s) => ({ ...s, followers: s.followers + 1 }));
+      }
+    }
+    setFollowBusy(false);
+  }
+
   if (!profile) {
     return (
       <main className="mx-auto max-w-4xl px-4 py-12 text-center">
