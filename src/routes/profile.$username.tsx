@@ -30,6 +30,8 @@ function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, groups: 0 });
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
