@@ -18,6 +18,15 @@ export function Header() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (q.trim()) {
+      navigate({ to: "/search", search: { q: q.trim() } });
+      setMobileSearchOpen(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
