@@ -334,11 +334,95 @@ function ProfilePage() {
   );
 }
 
-function Stat({ n, label }: { n: number; label: string }) {
-  return (
-    <div>
+function Stat({
+  n,
+  label,
+  onClick,
+  active,
+}: {
+  n: number;
+  label: string;
+  onClick?: () => void;
+  active?: boolean;
+}) {
+  const content = (
+    <>
       <div className="text-xl font-bold">{n.toLocaleString("de-DE")}</div>
       <div className="text-xs text-muted-foreground">{label}</div>
+    </>
+  );
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`-mx-2 rounded-md px-2 py-1 text-left transition-colors hover:bg-accent ${
+          active ? "bg-accent" : ""
+        }`}
+      >
+        {content}
+      </button>
+    );
+  }
+  return <div>{content}</div>;
+}
+
+function FollowList({
+  title,
+  users,
+  loading,
+  onClose,
+}: {
+  title: string;
+  users: FollowUser[] | null;
+  loading: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <div className="mt-4 rounded-2xl border border-border/60 bg-card p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7 rounded-full"
+          onClick={onClose}
+          aria-label="Schließen"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+      {loading || !users ? (
+        <div className="flex items-center justify-center py-6 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
+      ) : users.length === 0 ? (
+        <p className="py-4 text-center text-sm text-muted-foreground">Niemand hier.</p>
+      ) : (
+        <ul className="divide-y divide-border/60">
+          {users.map((u) => (
+            <li key={u.id}>
+              <Link
+                to="/profile/$username"
+                params={{ username: u.username }}
+                className="flex items-center gap-3 py-2 transition-colors hover:bg-accent/50 -mx-2 px-2 rounded-md"
+              >
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={u.avatar_url ?? undefined} />
+                  <AvatarFallback>{u.username[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">
+                    {u.display_name || u.username}
+                  </div>
+                  <div className="truncate text-xs text-muted-foreground">@{u.username}</div>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
+
