@@ -116,16 +116,22 @@ function FeedPage() {
                 </div>
 
                 {p.image_url && (
-                  <img
-                    src={p.image_url}
-                    alt={p.title ?? "Beitrag"}
-                    className="aspect-square w-full object-cover"
-                    loading="lazy"
-                  />
+                  <Link to="/post/$postId" params={{ postId: p.id }} className="block">
+                    <img
+                      src={p.image_url}
+                      alt={p.title ?? "Beitrag"}
+                      className="aspect-square w-full object-cover transition-opacity hover:opacity-95"
+                      loading="lazy"
+                    />
+                  </Link>
                 )}
 
                 <div className="space-y-3 p-4">
-                  {p.title && <p className="font-medium">{p.title}</p>}
+                  {p.title && (
+                    <Link to="/post/$postId" params={{ postId: p.id }} className="block font-medium hover:underline">
+                      {p.title}
+                    </Link>
+                  )}
                   {p.body && <p className="text-sm text-muted-foreground">{p.body}</p>}
                   <div className="flex items-center gap-4 pt-1">
                     <button
