@@ -16,6 +16,7 @@ import {
 import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
+import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/post/new")({
   component: NewPostPage,
@@ -53,6 +54,11 @@ function NewPostPage() {
   const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    const err = validateImageFile(file);
+    if (err) {
+      e.target.value = "";
+      return toast.error(err);
+    }
     setPreview(URL.createObjectURL(file));
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}.${ext}`;
