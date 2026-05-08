@@ -143,7 +143,21 @@ function ProfilePage() {
                   <Settings className="h-4 w-4" />
                 </Button>
               </>
-            ) : null}
+            ) : (
+              <Button
+                size="sm"
+                variant={isFollowing ? "secondary" : "default"}
+                className="rounded-full"
+                disabled={followBusy}
+                onClick={toggleFollow}
+              >
+                {isFollowing ? (
+                  <><UserCheck className="mr-1.5 h-4 w-4" /> Folge ich</>
+                ) : (
+                  <><UserPlus className="mr-1.5 h-4 w-4" /> Folgen</>
+                )}
+              </Button>
+            )}
             <Button
               size="icon"
               variant="secondary"
