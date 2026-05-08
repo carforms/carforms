@@ -202,10 +202,13 @@ function PostDetailPage() {
           {post.body && <p className="whitespace-pre-line text-sm text-muted-foreground">{post.body}</p>}
           <div className="flex items-center gap-4 pt-1">
             <button
+              type="button"
               onClick={toggleLike}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              aria-pressed={liked}
+              aria-label={liked ? "Like entfernen" : "Liken"}
+              className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground active:scale-95"
             >
-              <Heart className={`h-4 w-4 ${liked ? "fill-red-500 text-red-500" : ""}`} />
+              <Heart className={`h-4 w-4 transition-transform ${liked ? "scale-110 fill-red-500 text-red-500" : ""}`} />
               {likes.length}
             </button>
             <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
