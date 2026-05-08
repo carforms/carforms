@@ -31,21 +31,31 @@ function FeedPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
-    const { data, error, count } = await supabase
+    const { data: postsData, error } = await supabase
       .from("posts")
-      .select("*", { count: "exact" })
-      .limit(10);
-
-    console.log("RAW posts data:", data);
-    console.log("RAW posts error:", error);
-    console.log("RAW posts count:", count);
-
-    if (data && data.length > 0) {
-      console.log("Posts exist! First post:", data[0]);
-    } else {
-      console.log("No posts returned from DB");
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error || !postsData) {
+      setLoading(false);
+      return;
     }
-
+    const enriched = await Promise.all(
+      postsData.map(async (post) => {
+        const [{ data: profile }, { data: likes }, { data: comments }] = await Promise.all([
+          supabase.from("profiles").select("username,display_name,avatar_url").eq("id", post.author_id).single(),
+          supabase.from("post_likes").select("user_id").eq("post_id", post.id),
+          supabase.from("post_comments").select("id").eq("post_id", post.id),
+        ]);
+        return {
+          ...post,
+          profiles: profile ?? null,
+          post_likes: likes ?? [],
+          post_comments: comments ?? [],
+        };
+      })
+    );
+    setPosts(enriched as unknown as Post[]);
     setLoading(false);
   };
 
