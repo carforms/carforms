@@ -7,17 +7,26 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Link,
   Preview,
   Text,
 } from '@react-email/components'
+import {
+  LOGO_URL,
+  button,
+  container,
+  footer,
+  h1,
+  link,
+  logo,
+  logoWrap,
+  main,
+  text,
+} from './_shared'
 
 interface EmailChangeEmailProps {
   siteName: string
-  // oldEmail is the user's current address (HookData.OldEmail). For the
-  // NEW-recipient half of a secure email_change fanout, `email` equals the
-  // recipient (NEW), so the "from" line must render oldEmail to read
-  // "from OLD to NEW" instead of "from NEW to NEW".
   oldEmail: string
   email: string
   newEmail: string
@@ -30,32 +39,36 @@ export const EmailChangeEmail = ({
   newEmail,
   confirmationUrl,
 }: EmailChangeEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="de" dir="ltr">
     <Head />
-    <Preview>Confirm your email change for {siteName}</Preview>
+    <Preview>Bestätige deine neue E-Mail für {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Confirm your email change</Heading>
+        <div style={logoWrap}>
+          <Img src={LOGO_URL} alt={siteName} style={logo} />
+        </div>
+        <Heading style={h1}>E-Mail-Änderung bestätigen</Heading>
         <Text style={text}>
-          You requested to change your email address for {siteName} from{' '}
+          Du hast eine Änderung deiner E-Mail-Adresse bei {siteName}{' '}
+          angefordert: von{' '}
           <Link href={`mailto:${oldEmail}`} style={link}>
             {oldEmail}
           </Link>{' '}
-          to{' '}
+          zu{' '}
           <Link href={`mailto:${newEmail}`} style={link}>
             {newEmail}
           </Link>
           .
         </Text>
         <Text style={text}>
-          Click the button below to confirm this change:
+          Klicke auf den Button, um die Änderung zu bestätigen:
         </Text>
         <Button style={button} href={confirmationUrl}>
-          Confirm Email Change
+          Änderung bestätigen
         </Button>
         <Text style={footer}>
-          If you didn't request this change, please secure your account
-          immediately.
+          Falls du diese Änderung nicht angefordert hast, sichere dein Konto
+          umgehend.
         </Text>
       </Container>
     </Body>
@@ -63,28 +76,3 @@ export const EmailChangeEmail = ({
 )
 
 export default EmailChangeEmail
-
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const link = { color: 'inherit', textDecoration: 'underline' }
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
