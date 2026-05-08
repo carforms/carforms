@@ -16,6 +16,7 @@ import {
 import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
+import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/post/new")({
   component: NewPostPage,
