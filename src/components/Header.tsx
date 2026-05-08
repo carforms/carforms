@@ -66,6 +66,7 @@ export function Header() {
                 <Plus className="h-4 w-4" />
                 Beitrag
               </Button>
+              <NotificationBell />
               <DropdownMenu>
                 <DropdownMenuTrigger className="outline-none">
                   <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-transparent transition-all hover:ring-border">
