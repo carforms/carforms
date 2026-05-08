@@ -42,6 +42,17 @@ function FeedPage() {
 
   useEffect(() => {
     load();
+
+    const channel = supabase
+      .channel("feed-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "post_likes" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "post_comments" }, () => load())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const toggleLike = async (post: Post) => {
