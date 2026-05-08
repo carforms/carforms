@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import logoUrl from "@/assets/logo-carforms.jpg";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
