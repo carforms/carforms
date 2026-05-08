@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MapPin, Settings, Share2, UserPlus, UserCheck } from "lucide-react";
+import { MapPin, Settings, Share2, UserPlus, UserCheck, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -22,6 +22,7 @@ type Profile = {
 };
 
 type Post = { id: string; image_url: string | null; title: string | null };
+type FollowUser = { id: string; username: string; display_name: string | null; avatar_url: string | null };
 
 function ProfilePage() {
   const { username } = Route.useParams();
@@ -32,6 +33,52 @@ function ProfilePage() {
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0, groups: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
   const [followBusy, setFollowBusy] = useState(false);
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
+  const [followers, setFollowers] = useState<FollowUser[] | null>(null);
+  const [followingList, setFollowingList] = useState<FollowUser[] | null>(null);
+  const [followersLoading, setFollowersLoading] = useState(false);
+  const [followingLoading, setFollowingLoading] = useState(false);
+
+  // Reset lists when profile changes
+  useEffect(() => {
+    setShowFollowers(false);
+    setShowFollowing(false);
+    setFollowers(null);
+    setFollowingList(null);
+  }, [username]);
+
+  useEffect(() => {
+    if (!showFollowers || !profile || followers) return;
+    setFollowersLoading(true);
+    (async () => {
+      const { data } = await supabase
+        .from("follows")
+        .select("profiles:profiles!follows_follower_id_fkey(id,username,display_name,avatar_url)")
+        .eq("following_id", profile.id);
+      const list = ((data as unknown as { profiles: FollowUser | null }[]) ?? [])
+        .map((r) => r.profiles)
+        .filter((p): p is FollowUser => !!p);
+      setFollowers(list);
+      setFollowersLoading(false);
+    })();
+  }, [showFollowers, profile?.id]);
+
+  useEffect(() => {
+    if (!showFollowing || !profile || followingList) return;
+    setFollowingLoading(true);
+    (async () => {
+      const { data } = await supabase
+        .from("follows")
+        .select("profiles:profiles!follows_following_id_fkey(id,username,display_name,avatar_url)")
+        .eq("follower_id", profile.id);
+      const list = ((data as unknown as { profiles: FollowUser | null }[]) ?? [])
+        .map((r) => r.profiles)
+        .filter((p): p is FollowUser => !!p);
+      setFollowingList(list);
+      setFollowingLoading(false);
+    })();
+  }, [showFollowing, profile?.id]);
 
   useEffect(() => {
     (async () => {
