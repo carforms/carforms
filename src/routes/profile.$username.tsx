@@ -52,14 +52,21 @@ function ProfilePage() {
     if (!showFollowers || !profile || followers) return;
     setFollowersLoading(true);
     (async () => {
-      const { data } = await supabase
+      const { data: rows } = await supabase
         .from("follows")
-        .select("profiles:profiles!follows_follower_id_fkey(id,username,display_name,avatar_url)")
+        .select("follower_id")
         .eq("following_id", profile.id);
-      const list = ((data as unknown as { profiles: FollowUser | null }[]) ?? [])
-        .map((r) => r.profiles)
-        .filter((p): p is FollowUser => !!p);
-      setFollowers(list);
+      const ids = (rows ?? []).map((r) => r.follower_id);
+      if (ids.length === 0) {
+        setFollowers([]);
+        setFollowersLoading(false);
+        return;
+      }
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,username,display_name,avatar_url")
+        .in("id", ids);
+      setFollowers((profs as FollowUser[]) ?? []);
       setFollowersLoading(false);
     })();
   }, [showFollowers, profile?.id]);
@@ -68,14 +75,21 @@ function ProfilePage() {
     if (!showFollowing || !profile || followingList) return;
     setFollowingLoading(true);
     (async () => {
-      const { data } = await supabase
+      const { data: rows } = await supabase
         .from("follows")
-        .select("profiles:profiles!follows_following_id_fkey(id,username,display_name,avatar_url)")
+        .select("following_id")
         .eq("follower_id", profile.id);
-      const list = ((data as unknown as { profiles: FollowUser | null }[]) ?? [])
-        .map((r) => r.profiles)
-        .filter((p): p is FollowUser => !!p);
-      setFollowingList(list);
+      const ids = (rows ?? []).map((r) => r.following_id);
+      if (ids.length === 0) {
+        setFollowingList([]);
+        setFollowingLoading(false);
+        return;
+      }
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,username,display_name,avatar_url")
+        .in("id", ids);
+      setFollowingList((profs as FollowUser[]) ?? []);
       setFollowingLoading(false);
     })();
   }, [showFollowing, profile?.id]);
