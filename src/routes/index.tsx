@@ -176,20 +176,29 @@ function FeedPage() {
                   </div>
                 </div>
 
-                {p.image_url && (
+                {p.image_url ? (
                   <img
                     src={p.image_url}
                     alt={p.title ?? "Beitrag"}
                     className="aspect-square w-full object-cover transition-opacity group-hover:opacity-95"
                     loading="lazy"
                   />
-                )}
+                ) : (p.title || p.body) ? (
+                  <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 bg-gradient-to-br from-card to-accent/20 px-6 py-8 text-center">
+                    {p.title && (
+                      <p className="text-xl font-semibold leading-snug group-hover:underline">{p.title}</p>
+                    )}
+                    {p.body && (
+                      <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>
+                    )}
+                  </div>
+                ) : null}
 
                 <div className="space-y-3 p-4">
-                  {p.title && (
+                  {p.image_url && p.title && (
                     <p className="font-medium group-hover:underline">{p.title}</p>
                   )}
-                  {p.body && <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>}
+                  {p.image_url && p.body && <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>}
                   <div className="relative z-20 flex items-center gap-1 pt-1">
                     <button
                       type="button"
