@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/profile/edit")({
   component: EditProfilePage,
@@ -41,7 +42,7 @@ function EditProfilePage() {
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error, "Avatar konnte nicht hochgeladen werden."));
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
     setAvatarUrl(data.publicUrl);
   };
@@ -55,7 +56,7 @@ function EditProfilePage() {
       .update({ display_name: displayName, bio, location, avatar_url: avatarUrl })
       .eq("id", user.id);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error, "Profil konnte nicht gespeichert werden."));
     toast.success("Gespeichert");
     await refreshProfile();
     if (profile?.username) navigate({ to: "/profile/$username", params: { username: profile.username } });

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { lovable } from "@/integrations/lovable/index";
+import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -30,7 +31,7 @@ function SignupPage() {
       },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error));
     toast.success("Konto erstellt! Bitte E-Mail bestätigen.");
     navigate({ to: "/" });
   };
