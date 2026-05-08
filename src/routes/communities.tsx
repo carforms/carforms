@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/communities")({
   component: CommunitiesPage,
@@ -73,7 +74,7 @@ function CommunitiesPage() {
       .insert({ name, description, slug, created_by: user.id })
       .select()
       .single();
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error));
     await supabase.from("community_members").insert({ community_id: data.id, user_id: user.id, role: "owner" });
     toast.success("Community erstellt!");
     setOpen(false);

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/post/new")({
   component: NewPostPage,
@@ -56,7 +57,7 @@ function NewPostPage() {
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("posts").upload(path, file);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error, "Bild konnte nicht hochgeladen werden."));
     const { data } = supabase.storage.from("posts").getPublicUrl(path);
     setImageUrl(data.publicUrl);
   };
@@ -73,7 +74,7 @@ function NewPostPage() {
       community_id: community === "none" ? null : community,
     });
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error, "Beitrag konnte nicht erstellt werden."));
     toast.success("Beitrag veröffentlicht");
     navigate({ to: "/" });
   };
