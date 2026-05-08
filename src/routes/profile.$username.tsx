@@ -64,51 +64,61 @@ function ProfilePage() {
     })();
   }, [username]);
 
+  const refreshFollowState = async (profileId: string, userId: string) => {
+    const { data, error } = await supabase
+      .from("follows")
+      .select("follower_id")
+      .eq("follower_id", userId)
+      .eq("following_id", profileId)
+      .maybeSingle();
+    if (error) console.error("[follows] check failed", error);
+    setIsFollowing(!!data);
+  };
+
   useEffect(() => {
     if (!profile || !user || user.id === profile.id) {
       setIsFollowing(false);
       return;
     }
-    (async () => {
-      const { data } = await supabase
-        .from("follows")
-        .select("follower_id")
-        .eq("follower_id", user.id)
-        .eq("following_id", profile.id)
-        .maybeSingle();
-      setIsFollowing(!!data);
-    })();
-  }, [profile, user]);
+    refreshFollowState(profile.id, user.id);
+  }, [profile?.id, user?.id]);
 
   async function toggleFollow() {
     if (!user) {
       navigate({ to: "/login" });
       return;
     }
-    if (!profile) return;
+    if (!profile || followBusy) return;
+    if (user.id === profile.id) return;
+
     setFollowBusy(true);
-    if (isFollowing) {
-      const { error } = await supabase
-        .from("follows")
-        .delete()
-        .eq("follower_id", user.id)
-        .eq("following_id", profile.id);
-      if (error) {
-        toast.error(toUserMessage(error));
-      } else {
-        setIsFollowing(false);
-        setStats((s) => ({ ...s, followers: Math.max(0, s.followers - 1) }));
-      }
+    const wasFollowing = isFollowing;
+    setIsFollowing(!wasFollowing);
+    setStats((s) => ({
+      ...s,
+      followers: Math.max(0, s.followers + (wasFollowing ? -1 : 1)),
+    }));
+
+    const { error } = wasFollowing
+      ? await supabase
+          .from("follows")
+          .delete()
+          .eq("follower_id", user.id)
+          .eq("following_id", profile.id)
+      : await supabase
+          .from("follows")
+          .insert({ follower_id: user.id, following_id: profile.id });
+
+    if (error) {
+      console.error("[follows] toggle failed", error);
+      toast.error(toUserMessage(error, wasFollowing ? "Entfolgen fehlgeschlagen." : "Folgen fehlgeschlagen."));
+      setIsFollowing(wasFollowing);
+      setStats((s) => ({
+        ...s,
+        followers: Math.max(0, s.followers + (wasFollowing ? 1 : -1)),
+      }));
     } else {
-      const { error } = await supabase
-        .from("follows")
-        .insert({ follower_id: user.id, following_id: profile.id });
-      if (error) {
-        toast.error(toUserMessage(error));
-      } else {
-        setIsFollowing(true);
-        setStats((s) => ({ ...s, followers: s.followers + 1 }));
-      }
+      await refreshFollowState(profile.id, user.id);
     }
     setFollowBusy(false);
   }
