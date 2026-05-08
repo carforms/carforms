@@ -76,7 +76,12 @@ function ProfilePage() {
   };
 
   useEffect(() => {
-    if (!profile || !user || user.id === profile.id) {
+    setIsFollowing(false);
+  }, [username]);
+
+  useEffect(() => {
+    if (!profile || !user) return;
+    if (user.id === profile.id) {
       setIsFollowing(false);
       return;
     }
