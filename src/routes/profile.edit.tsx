@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
+import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/profile/edit")({
   component: EditProfilePage,
