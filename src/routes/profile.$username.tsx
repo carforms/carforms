@@ -249,10 +249,43 @@ function ProfilePage() {
 
           <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2">
             <Stat n={stats.posts} label="Posts" />
-            <Stat n={stats.followers} label="Followers" />
-            <Stat n={stats.following} label="Folgende" />
+            <Stat
+              n={stats.followers}
+              label="Followers"
+              onClick={() => {
+                setShowFollowers((v) => !v);
+                setShowFollowing(false);
+              }}
+              active={showFollowers}
+            />
+            <Stat
+              n={stats.following}
+              label="Folgende"
+              onClick={() => {
+                setShowFollowing((v) => !v);
+                setShowFollowers(false);
+              }}
+              active={showFollowing}
+            />
             <Stat n={stats.groups} label="Gruppen" />
           </div>
+
+          {showFollowers && (
+            <FollowList
+              title="Followers"
+              users={followers}
+              loading={followersLoading}
+              onClose={() => setShowFollowers(false)}
+            />
+          )}
+          {showFollowing && (
+            <FollowList
+              title="Folgt"
+              users={followingList}
+              loading={followingLoading}
+              onClose={() => setShowFollowing(false)}
+            />
+          )}
 
           {profile.bio && <p className="mt-4 text-sm">{profile.bio}</p>}
           {profile.location && (
