@@ -18,6 +18,15 @@ export function Header() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (q.trim()) {
+      navigate({ to: "/search", search: { q: q.trim() } });
+      setMobileSearchOpen(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
@@ -32,10 +41,7 @@ export function Header() {
 
         <form
           className="relative ml-2 hidden flex-1 md:block"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (q.trim()) navigate({ to: "/search", search: { q: q.trim() } });
-          }}
+          onSubmit={submitSearch}
         >
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -47,6 +53,15 @@ export function Header() {
         </form>
 
         <nav className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Suche öffnen"
+            onClick={() => setMobileSearchOpen((v) => !v)}
+            className="flex items-center justify-center rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
+          >
+            <Search className="h-5 w-5" />
+          </button>
+
           <Link
             to="/communities"
             className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -105,6 +120,21 @@ export function Header() {
           )}
         </nav>
       </div>
+
+      {mobileSearchOpen && (
+        <div className="border-t border-border/60 bg-background/95 px-4 py-3 md:hidden">
+          <form className="relative" onSubmit={submitSearch}>
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              autoFocus
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Suche, Services, Werkstätten…"
+              className="h-10 w-full rounded-full border border-border/60 bg-card/60 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-border"
+            />
+          </form>
+        </div>
+      )}
     </header>
   );
 }
