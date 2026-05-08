@@ -223,13 +223,15 @@ function ProfilePage() {
         <ul className="mt-6 grid grid-cols-3 gap-1 sm:gap-2">
           {posts.map((p) => (
             <li key={p.id} className="aspect-square overflow-hidden rounded-md bg-card">
-              {p.image_url ? (
-                <img src={p.image_url} alt={p.title ?? ""} className="h-full w-full object-cover transition-opacity hover:opacity-90" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center p-3 text-center text-xs text-muted-foreground">
-                  {p.title ?? "Post"}
-                </div>
-              )}
+              <Link to="/post/$postId" params={{ postId: p.id }} className="block h-full w-full">
+                {p.image_url ? (
+                  <img src={p.image_url} alt={p.title ?? ""} className="h-full w-full object-cover transition-opacity hover:opacity-90" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center p-3 text-center text-xs text-muted-foreground">
+                    {p.title ?? "Post"}
+                  </div>
+                )}
+              </Link>
             </li>
           ))}
         </ul>
