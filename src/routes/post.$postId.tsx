@@ -128,7 +128,21 @@ function PostDetailPage() {
   }
 
   if (loading) {
-    return <main className="mx-auto max-w-2xl px-4 py-8 text-sm text-muted-foreground">Lade…</main>;
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-6">
+        <div className="mb-4 h-8 w-20 animate-pulse rounded-full bg-primary/10" />
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+          <div className="flex items-center gap-3 p-4">
+            <div className="h-10 w-10 animate-pulse rounded-full bg-primary/10" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-24 animate-pulse rounded bg-primary/10" />
+              <div className="h-2.5 w-16 animate-pulse rounded bg-primary/10" />
+            </div>
+          </div>
+          <div className="aspect-square w-full animate-pulse bg-primary/10" />
+        </div>
+      </main>
+    );
   }
   if (!post) {
     return (
