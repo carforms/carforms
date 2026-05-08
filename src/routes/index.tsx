@@ -111,7 +111,20 @@ function FeedPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="sr-only">Feed</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="sr-only">Feed</h1>
+        <div />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={handleRefresh}
+          aria-label="Feed aktualisieren"
+          className="rounded-full"
+        >
+          <RefreshCw className={refreshing ? "animate-spin" : ""} />
+        </Button>
+      </div>
 
       {!user && (
         <div className="mb-6 flex flex-col items-start gap-3 rounded-2xl border border-border/60 bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
