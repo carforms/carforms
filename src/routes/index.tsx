@@ -174,47 +174,40 @@ function FeedPage() {
             return (
               <li
                 key={p.id}
-                className="group cursor-pointer overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-border hover:shadow-md"
+                className="group overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-border hover:shadow-md"
               >
+                {/* Author row — not part of the post link */}
+                <div className="flex items-center gap-3 p-4">
+                  <Link to="/profile/$username" params={{ username }} className="shrink-0">
+                    <Avatar className="h-9 w-9 transition-transform hover:scale-105">
+                      <AvatarImage src={p.profiles?.avatar_url ?? undefined} />
+                      <AvatarFallback>{username[0]?.toUpperCase() ?? "U"}</AvatarFallback>
+                    </Avatar>
+                  </Link>
+                  <div className="min-w-0">
+                    <Link
+                      to="/profile/$username"
+                      params={{ username }}
+                      className="block truncate text-sm font-medium hover:underline"
+                    >
+                      @{username}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(p.created_at).toLocaleDateString("de-DE", {
+                        day: "2-digit",
+                        month: "short",
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Clickable post body */}
                 <Link
                   to="/post/$postId"
                   params={{ postId: p.id }}
                   aria-label={p.title ?? "Beitrag öffnen"}
-                  className="block"
+                  className="block cursor-pointer"
                 >
-                  <div
-                    className="flex items-center gap-3 p-4"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Link
-                      to="/profile/$username"
-                      params={{ username }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="shrink-0"
-                    >
-                      <Avatar className="h-9 w-9 transition-transform hover:scale-105">
-                        <AvatarImage src={p.profiles?.avatar_url ?? undefined} />
-                        <AvatarFallback>{username[0]?.toUpperCase() ?? "U"}</AvatarFallback>
-                      </Avatar>
-                    </Link>
-                    <div className="min-w-0">
-                      <Link
-                        to="/profile/$username"
-                        params={{ username }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="block truncate text-sm font-medium hover:underline"
-                      >
-                        @{username}
-                      </Link>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(p.created_at).toLocaleDateString("de-DE", {
-                          day: "2-digit",
-                          month: "short",
-                        })}
-                      </p>
-                    </div>
-                  </div>
-
                   {p.image_url ? (
                     <img
                       src={p.image_url}
@@ -233,32 +226,35 @@ function FeedPage() {
                     </div>
                   ) : null}
 
-                  <div className="space-y-3 p-4">
-                    {p.image_url && p.title && (
-                      <p className="font-medium group-hover:underline">{p.title}</p>
-                    )}
-                    {p.image_url && p.body && <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>}
-                    <div className="flex items-center gap-1 pt-1">
-                      <button
-                        type="button"
-                        onClick={(e) => toggleLike(p, e)}
-                        aria-pressed={liked}
-                        aria-label={liked ? "Like entfernen" : "Liken"}
-                        className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground active:scale-95"
-                      >
-                        <Heart className={`h-4 w-4 transition-transform ${liked ? "scale-110 fill-red-500 text-red-500" : ""}`} />
-                        {p.post_likes.length}
-                      </button>
-                      <span
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        {p.post_comments.length}
-                      </span>
+                  {(p.image_url && (p.title || p.body)) && (
+                    <div className="space-y-2 px-4 pt-4">
+                      {p.title && <p className="font-medium group-hover:underline">{p.title}</p>}
+                      {p.body && <p className="text-sm text-muted-foreground line-clamp-3">{p.body}</p>}
                     </div>
-                  </div>
+                  )}
                 </Link>
+
+                {/* Like and comment row — outside the post link */}
+                <div className="flex items-center gap-1 px-4 pb-4 pt-3">
+                  <button
+                    type="button"
+                    onClick={(e) => toggleLike(p, e)}
+                    aria-pressed={liked}
+                    aria-label={liked ? "Like entfernen" : "Liken"}
+                    className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground active:scale-95"
+                  >
+                    <Heart className={`h-4 w-4 transition-transform ${liked ? "scale-110 fill-red-500 text-red-500" : ""}`} />
+                    {p.post_likes.length}
+                  </button>
+                  <Link
+                    to="/post/$postId"
+                    params={{ postId: p.id }}
+                    className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    {p.post_comments.length}
+                  </Link>
+                </div>
               </li>
             );
           })}
