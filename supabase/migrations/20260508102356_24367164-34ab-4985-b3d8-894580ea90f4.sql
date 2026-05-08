@@ -1,0 +1,1 @@
+revoke execute on function public.notify_on_follow() from public, anon, authenticated;

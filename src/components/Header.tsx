@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import logoUrl from "@/assets/logo-carforms.jpg";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
@@ -65,6 +66,7 @@ export function Header() {
                 <Plus className="h-4 w-4" />
                 Beitrag
               </Button>
+              <NotificationBell />
               <DropdownMenu>
                 <DropdownMenuTrigger className="outline-none">
                   <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-transparent transition-all hover:ring-border">
