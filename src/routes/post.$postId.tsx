@@ -43,27 +43,40 @@ function PostDetailPage() {
 
   async function load() {
     setLoading(true);
-    const { data: p } = await supabase
+    const { data: postData, error } = await supabase
       .from("posts")
-      .select(
-        "id,title,body,image_url,created_at,author_id,profiles:profiles!posts_author_id_fkey(username,display_name,avatar_url)",
-      )
+      .select("id,title,body,image_url,created_at,author_id")
       .eq("id", postId)
-      .maybeSingle();
-    setPost((p as unknown as PostDetail) ?? null);
-
-    const [{ data: l }, { data: c }] = await Promise.all([
-      supabase.from("post_likes").select("user_id").eq("post_id", postId),
+      .single();
+    if (error || !postData) {
+      setPost(null);
+      setLoading(false);
+      return;
+    }
+    const [{ data: profile }, { data: likes }, { data: comments }] = await Promise.all([
+      supabase.from("profiles").select("username,display_name,avatar_url").eq("id", postData.author_id).single(),
+      supabase.from("post_likes").select("user_id").eq("post_id", postData.id),
       supabase
         .from("post_comments")
-        .select(
-          "id,body,created_at,user_id,profiles:profiles!post_comments_user_id_fkey(username,display_name,avatar_url)",
-        )
-        .eq("post_id", postId)
+        .select("id,body,created_at,user_id")
+        .eq("post_id", postData.id)
         .order("created_at", { ascending: true }),
     ]);
-    setLikes((l as { user_id: string }[]) ?? []);
-    setComments((c as unknown as Comment[]) ?? []);
+    const commentProfiles = await Promise.all(
+      (comments ?? []).map((c) =>
+        supabase
+          .from("profiles")
+          .select("username,display_name,avatar_url")
+          .eq("id", c.user_id)
+          .single()
+          .then(({ data }) => data ?? null),
+      ),
+    );
+    setPost({ ...postData, profiles: profile ?? null } as unknown as PostDetail);
+    setLikes((likes as { user_id: string }[]) ?? []);
+    setComments(
+      ((comments ?? []).map((c, i) => ({ ...c, profiles: commentProfiles[i] })) as unknown as Comment[]),
+    );
     setLoading(false);
   }
 
