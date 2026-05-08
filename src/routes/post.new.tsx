@@ -76,7 +76,7 @@ function NewPostPage() {
     setSaving(false);
     if (error) return toast.error(toUserMessage(error, "Beitrag konnte nicht erstellt werden."));
     toast.success("Beitrag veröffentlicht");
-    navigate({ to: "/" });
+    navigate({ to: "/", replace: false });
   };
 
   return (
