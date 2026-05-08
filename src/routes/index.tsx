@@ -142,10 +142,14 @@ function FeedPage() {
                       <Heart className={`h-4 w-4 ${liked ? "fill-red-500 text-red-500" : ""}`} />
                       {p.post_likes.length}
                     </button>
-                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Link
+                      to="/post/$postId"
+                      params={{ postId: p.id }}
+                      className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
                       <MessageCircle className="h-4 w-4" />
                       {p.post_comments.length}
-                    </span>
+                    </Link>
                   </div>
                 </div>
               </li>
