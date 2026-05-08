@@ -31,14 +31,21 @@ function FeedPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
-    const { data } = await supabase
+    const { data, error, count } = await supabase
       .from("posts")
-      .select(
-        "id,title,body,image_url,created_at,author_id,profiles:profiles!posts_author_id_fkey(username,display_name,avatar_url),post_likes(user_id),post_comments(id)"
-      )
-      .order("created_at", { ascending: false })
-      .limit(50);
-    setPosts((data as unknown as Post[]) ?? []);
+      .select("*", { count: "exact" })
+      .limit(10);
+
+    console.log("RAW posts data:", data);
+    console.log("RAW posts error:", error);
+    console.log("RAW posts count:", count);
+
+    if (data && data.length > 0) {
+      console.log("Posts exist! First post:", data[0]);
+    } else {
+      console.log("No posts returned from DB");
+    }
+
     setLoading(false);
   };
 
