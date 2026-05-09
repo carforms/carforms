@@ -8,7 +8,7 @@ import { FileText, Loader2, MessageCircle, Paperclip, Send, Users, X } from "luc
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
-export const Route = createFileRoute("/communities/$slug")({
+export const Route = createFileRoute("/communities_/$slug")({
   component: CommunityDetail,
 });
 
