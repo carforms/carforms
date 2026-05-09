@@ -198,20 +198,22 @@ function FeedPage() {
             </div>
           </section>
 
-          <div className="mb-8 flex items-center justify-between rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3">
-            <div className="flex items-center gap-3">
-              <Trophy className="h-5 w-5 text-yellow-500" />
-              <div>
-                <p className="text-sm font-semibold text-yellow-500">Car of the Week</p>
-                <p className="text-xs text-muted-foreground">Stimme jetzt ab — welcher Build verdient die Krone?</p>
-              </div>
-            </div>
-            <Button size="sm" variant="outline" className="rounded-full border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10" asChild>
-              <Link to="/communities">Abstimmen</Link>
-            </Button>
-          </div>
         </>
       )}
+
+      {/* Car of the Week - always visible */}
+      <div className="mb-8 flex items-center justify-between rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3">
+        <div className="flex items-center gap-3">
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          <div>
+            <p className="text-sm font-semibold text-yellow-500">Car of the Week</p>
+            <p className="text-xs text-muted-foreground">Stimme jetzt ab — welcher Build verdient die Krone?</p>
+          </div>
+        </div>
+        <Button size="sm" variant="outline" className="rounded-full border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10" asChild>
+          <Link to="/communities">Zur Abstimmung</Link>
+        </Button>
+      </div>
 
       {loading ? (
         <ul className="space-y-6">
