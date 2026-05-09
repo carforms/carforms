@@ -134,8 +134,8 @@ function NewPostPage() {
             </SelectContent>
           </Select>
         </div>
-        <Button type="submit" className="w-full rounded-full" disabled={saving}>
-          {saving ? "Veröffentliche…" : "Veröffentlichen"}
+        <Button type="submit" className="w-full rounded-full" disabled={saving || uploading}>
+          {uploading ? "Bild wird hochgeladen..." : saving ? "Veröffentliche…" : "Veröffentlichen"}
         </Button>
       </form>
     </main>
