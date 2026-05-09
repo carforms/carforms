@@ -162,15 +162,69 @@ function CommunityDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatOpen, community?.id]);
 
+  const pickFile = (file: File | null) => {
+    if (!file) return;
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      toast.error("Datei darf maximal 10 MB groß sein.");
+      return;
+    }
+    setPendingFile(file);
+    if (file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file);
+      setPendingPreview(url);
+    } else {
+      setPendingPreview(null);
+    }
+  };
+
+  const clearPending = () => {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(null);
+    setPendingPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user || !community) return;
+    if (!user || !community) return;
+    const text = newMessage.trim();
+    if (!text && !pendingFile) return;
+
+    let attachment_url: string | null = null;
+    let attachment_type: string | null = null;
+    let attachment_name: string | null = null;
+    let attachment_size: number | null = null;
+
+    if (pendingFile) {
+      setUploading(true);
+      const ext = pendingFile.name.split(".").pop() || "bin";
+      const path = `${user.id}/${community.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("chat-attachments")
+        .upload(path, pendingFile, { contentType: pendingFile.type, upsert: false });
+      if (upErr) {
+        setUploading(false);
+        return toast.error(toUserMessage(upErr));
+      }
+      const { data: pub } = supabase.storage.from("chat-attachments").getPublicUrl(path);
+      attachment_url = pub.publicUrl;
+      attachment_type = pendingFile.type || "application/octet-stream";
+      attachment_name = pendingFile.name;
+      attachment_size = pendingFile.size;
+      setUploading(false);
+    }
+
     const { error } = await supabase.from("community_messages").insert({
       community_id: community.id,
       user_id: user.id,
-      body: newMessage.trim(),
+      body: text || null,
+      attachment_url,
+      attachment_type,
+      attachment_name,
+      attachment_size,
     });
     if (error) return toast.error(toUserMessage(error));
     setNewMessage("");
+    clearPending();
   };
 
   if (!community) return <main className="mx-auto max-w-4xl p-8 text-sm text-muted-foreground">Lade…</main>;
