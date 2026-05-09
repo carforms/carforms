@@ -106,12 +106,13 @@ function CommunityDetail() {
 
     const enriched = await Promise.all(
       data.map(async (msg) => {
+        if (!msg.user_id) return { ...msg, user_id: "", profiles: null };
         const { data: profile } = await supabase
           .from("profiles")
           .select("username,avatar_url")
           .eq("id", msg.user_id)
           .maybeSingle();
-        return { ...msg, profiles: profile ?? null };
+        return { ...msg, user_id: msg.user_id, profiles: profile ?? null };
       })
     );
     setMessages(enriched as Message[]);
