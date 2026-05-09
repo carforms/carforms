@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
-export const Route = createFileRoute("/communities")({
+export const Route = createFileRoute("/communities/")({
   component: CommunitiesPage,
 });
 
