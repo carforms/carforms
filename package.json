@@ -9,7 +9,10 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "check:routes": "bun scripts/check-routes.ts",
+    "predev": "bun scripts/check-routes.ts || true",
+    "prebuild": "bun scripts/check-routes.ts"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
