@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.is_community_admin(uuid) FROM PUBLIC, anon, authenticated;
