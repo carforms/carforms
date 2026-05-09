@@ -55,18 +55,30 @@ function NewPostPage() {
   const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    const err = validateImageFile(file);
-    if (err) {
+    if (file.size > 10 * 1024 * 1024) {
       e.target.value = "";
-      return toast.error(err);
+      return toast.error("Bild darf maximal 10MB groß sein.");
+    }
+    const fileExt = file.name.split(".").pop()?.toLowerCase();
+    const allowedTypes = ["jpg", "jpeg", "png", "webp", "gif"];
+    if (!fileExt || !allowedTypes.includes(fileExt)) {
+      e.target.value = "";
+      return toast.error("Nur JPG, PNG, WEBP oder GIF erlaubt.");
     }
     setPreview(URL.createObjectURL(file));
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("posts").upload(path, file);
-    if (error) return toast.error(toUserMessage(error, "Bild konnte nicht hochgeladen werden."));
-    const { data } = supabase.storage.from("posts").getPublicUrl(path);
+    setUploading(true);
+    const filePath = `posts/${user.id}/${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("post-images")
+      .upload(filePath, file, { upsert: true, contentType: file.type });
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      setUploading(false);
+      return toast.error("Bild konnte nicht hochgeladen werden: " + uploadError.message);
+    }
+    const { data } = supabase.storage.from("post-images").getPublicUrl(filePath);
     setImageUrl(data.publicUrl);
+    setUploading(false);
   };
 
   const submit = async (e: React.FormEvent) => {
