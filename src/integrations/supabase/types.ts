@@ -75,21 +75,33 @@ export type Database = {
       }
       community_messages: {
         Row: {
-          body: string
+          attachment_name: string | null
+          attachment_size: number | null
+          attachment_type: string | null
+          attachment_url: string | null
+          body: string | null
           community_id: string | null
           created_at: string
           id: string
           user_id: string | null
         }
         Insert: {
-          body: string
+          attachment_name?: string | null
+          attachment_size?: number | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          body?: string | null
           community_id?: string | null
           created_at?: string
           id?: string
           user_id?: string | null
         }
         Update: {
-          body?: string
+          attachment_name?: string | null
+          attachment_size?: number | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          body?: string | null
           community_id?: string | null
           created_at?: string
           id?: string
