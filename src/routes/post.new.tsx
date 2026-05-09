@@ -83,8 +83,14 @@ function NewPostPage() {
       if (uploadError) {
         console.error("UPLOAD ERROR:", uploadError);
         const msg = uploadError.message?.toLowerCase() ?? "";
-        if (msg.includes("row-level security") || msg.includes("unauthorized") || msg.includes("permission")) {
-          toast.error("Keine Berechtigung zum Hochladen. Bitte erneut anmelden und nochmal versuchen.");
+        if (
+          msg.includes("row-level security") ||
+          msg.includes("unauthorized") ||
+          msg.includes("permission")
+        ) {
+          toast.error(
+            "Keine Berechtigung zum Hochladen. Bitte erneut anmelden und nochmal versuchen.",
+          );
         } else if (msg.includes("bucket") && msg.includes("not found")) {
           toast.error("Speicher-Bucket „post-images“ existiert nicht. Bitte Admin kontaktieren.");
         } else if (msg.includes("payload") || msg.includes("size") || msg.includes("too large")) {
@@ -152,20 +158,36 @@ function NewPostPage() {
 
         <div className="space-y-2">
           <Label htmlFor="title">Titel</Label>
-          <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="z.B. Perfekter Sonntagmorgen" />
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={120}
+            placeholder="z.B. Perfekter Sonntagmorgen"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="body">Text (optional)</Label>
-          <Textarea id="body" value={body} onChange={(e) => setBody(e.target.value)} maxLength={500} rows={3} />
+          <Textarea
+            id="body"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            maxLength={500}
+            rows={3}
+          />
         </div>
         <div className="space-y-2">
           <Label>Community (optional)</Label>
           <Select value={community} onValueChange={setCommunity}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Keine</SelectItem>
               {communities.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
