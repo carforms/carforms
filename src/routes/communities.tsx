@@ -40,15 +40,42 @@ function CommunitiesPage() {
   const [description, setDescription] = useState("");
 
   const load = async () => {
-    const { data } = await supabase
+    const { data: communities } = await supabase
       .from("communities")
-      .select("id,slug,name,description,cover_url,community_members(user_id)")
+      .select("id,slug,name,description,cover_url")
       .order("created_at", { ascending: false });
-    setItems((data as unknown as Community[]) ?? []);
+    if (!communities) {
+      setItems([]);
+      return;
+    }
+    const enriched = await Promise.all(
+      communities.map(async (c) => {
+        const [{ count }, membership] = await Promise.all([
+          supabase
+            .from("community_members")
+            .select("*", { count: "exact", head: true })
+            .eq("community_id", c.id),
+          user
+            ? supabase
+                .from("community_members")
+                .select("user_id")
+                .eq("community_id", c.id)
+                .eq("user_id", user.id)
+                .maybeSingle()
+            : Promise.resolve({ data: null }),
+        ]);
+        return {
+          ...c,
+          member_count: count ?? 0,
+          is_member: !!membership.data,
+        };
+      })
+    );
+    setItems(enriched as Community[]);
   };
   useEffect(() => {
     load();
-  }, []);
+  }, [user?.id]);
 
   const toggleJoin = async (c: Community) => {
     if (!user) return navigate({ to: "/login" });
