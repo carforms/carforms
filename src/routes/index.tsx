@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 export const Route = createFileRoute("/")({
   component: FeedPage,
@@ -18,7 +19,7 @@ type Post = {
   image_url: string | null;
   created_at: string;
   author_id: string;
-  profiles: { username: string; display_name: string | null; avatar_url: string | null } | null;
+  profiles: { username: string; display_name: string | null; avatar_url: string | null; verified: boolean } | null;
   post_likes: { user_id: string }[];
   post_comments: { id: string }[];
 };
@@ -43,7 +44,7 @@ function FeedPage() {
     const enriched = await Promise.all(
       postsData.map(async (post) => {
         const [{ data: profile }, { data: likes }, { data: comments }] = await Promise.all([
-          supabase.from("profiles").select("username,display_name,avatar_url").eq("id", post.author_id).single(),
+          supabase.from("profiles").select("username,display_name,avatar_url,verified").eq("id", post.author_id).single(),
           supabase.from("post_likes").select("user_id").eq("post_id", post.id),
           supabase.from("post_comments").select("id").eq("post_id", post.id),
         ]);
@@ -205,9 +206,10 @@ function FeedPage() {
                     <Link
                       to="/profile/$username"
                       params={{ username }}
-                      className="block truncate text-sm font-medium hover:underline"
+                      className="flex items-center gap-1 truncate text-sm font-medium hover:underline"
                     >
-                      @{username}
+                      <span className="truncate">@{username}</span>
+                      {p.profiles?.verified && <VerifiedBadge className="h-3.5 w-3.5" />}
                     </Link>
                     <p className="text-xs text-muted-foreground">
                       {new Date(p.created_at).toLocaleDateString("de-DE", {

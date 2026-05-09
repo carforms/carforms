@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, ArrowLeft, Trash2, ImagePlus, X } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -19,7 +20,7 @@ type PostDetail = {
   image_url: string | null;
   created_at: string;
   author_id: string;
-  profiles: { username: string; display_name: string | null; avatar_url: string | null } | null;
+  profiles: { username: string; display_name: string | null; avatar_url: string | null; verified: boolean } | null;
 };
 
 type Comment = {
@@ -28,7 +29,7 @@ type Comment = {
   image_url: string | null;
   created_at: string;
   user_id: string;
-  profiles: { username: string; display_name: string | null; avatar_url: string | null } | null;
+  profiles: { username: string; display_name: string | null; avatar_url: string | null; verified: boolean } | null;
 };
 
 function PostDetailPage() {
@@ -58,7 +59,7 @@ function PostDetailPage() {
       return;
     }
     const [{ data: profile }, { data: likes }, { data: comments }] = await Promise.all([
-      supabase.from("profiles").select("username,display_name,avatar_url").eq("id", postData.author_id).single(),
+      supabase.from("profiles").select("username,display_name,avatar_url,verified").eq("id", postData.author_id).single(),
       supabase.from("post_likes").select("user_id").eq("post_id", postData.id),
       supabase
         .from("post_comments")
@@ -70,7 +71,7 @@ function PostDetailPage() {
       (comments ?? []).map((c) =>
         supabase
           .from("profiles")
-          .select("username,display_name,avatar_url")
+          .select("username,display_name,avatar_url,verified")
           .eq("id", c.user_id)
           .single()
           .then(({ data }) => data ?? null),
@@ -212,7 +213,10 @@ function PostDetailPage() {
               <AvatarFallback>{post.profiles?.username?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium hover:underline">@{post.profiles?.username}</p>
+              <p className="flex items-center gap-1 text-sm font-medium hover:underline">
+                @{post.profiles?.username}
+                {post.profiles?.verified && <VerifiedBadge className="h-3.5 w-3.5" />}
+              </p>
               <p className="text-xs text-muted-foreground">
                 {new Date(post.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" })}
               </p>
@@ -331,9 +335,10 @@ function PostDetailPage() {
                     <Link
                       to="/profile/$username"
                       params={{ username: c.profiles?.username ?? "" }}
-                      className="text-xs font-semibold hover:underline"
+                      className="flex items-center gap-1 text-xs font-semibold hover:underline"
                     >
-                      @{c.profiles?.username}
+                      <span>@{c.profiles?.username}</span>
+                      {c.profiles?.verified && <VerifiedBadge className="h-3 w-3" />}
                     </Link>
                     {user?.id === c.user_id && (
                       <button
