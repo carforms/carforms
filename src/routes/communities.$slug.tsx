@@ -269,23 +269,38 @@ function CommunityDetail() {
         </button>
       )}
 
-      {chatOpen && (
-        <section className="mt-4 overflow-hidden rounded-2xl border border-border/60 bg-card">
-          <div className="flex items-center gap-2 border-b border-border/60 px-5 py-3">
-            <MessageCircle className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold">Community Chat</h2>
-            <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Live
-            </span>
-          </div>
+      {isMember && chatOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-background/40 backdrop-blur-sm sm:hidden"
+            onClick={() => setChatOpen(false)}
+            aria-hidden="true"
+          />
+          <section className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-border/60 bg-card shadow-2xl animate-in slide-in-from-right duration-300">
+            <div className="flex items-center gap-2 border-b border-border/60 px-5 py-3">
+              <MessageCircle className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-sm font-semibold truncate">{community.name} — Chat</h2>
+              <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Live
+              </span>
+              <button
+                type="button"
+                onClick={() => setChatOpen(false)}
+                className="ml-2 rounded-full p-1 hover:bg-accent"
+                aria-label="Chat schließen"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
 
-          <div className="flex h-[420px] flex-col gap-3 overflow-y-auto p-5">
-            {messages.length === 0 && (
-              <div className="m-auto text-center text-sm text-muted-foreground">
-                Noch keine Nachrichten. Starte die Konversation!
-              </div>
-            )}
+            <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-5">
+              {messages.length === 0 && (
+                <div className="m-auto flex flex-col items-center gap-2 text-center text-sm text-muted-foreground">
+                  <MessageCircle className="h-8 w-8 opacity-40" />
+                  <p>Noch keine Nachrichten.<br />Starte die Konversation!</p>
+                </div>
+              )}
             {messages.map((msg) => {
               const isOwn = msg.user_id === user?.id;
               return (
