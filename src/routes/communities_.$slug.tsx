@@ -80,6 +80,84 @@ function CommunityDetail() {
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  const isAdmin = !!user && !!community && community.created_by === user.id;
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editCoverFile, setEditCoverFile] = useState<File | null>(null);
+  const [savingMeta, setSavingMeta] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
+  const [members, setMembers] = useState<Member[]>([]);
+
+  const loadMembers = async () => {
+    if (!community) return;
+    const { data } = await supabase
+      .from("community_members")
+      .select("user_id, role")
+      .eq("community_id", community.id);
+    if (!data) return;
+    const enriched = await Promise.all(
+      data.map(async (m) => {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username, avatar_url")
+          .eq("id", m.user_id)
+          .maybeSingle();
+        return { ...m, profiles: profile ?? null } as Member;
+      })
+    );
+    setMembers(enriched);
+  };
+
+  const saveMeta = async () => {
+    if (!community || !isAdmin) return;
+    setSavingMeta(true);
+    let cover_url = community.cover_url;
+    if (editCoverFile) {
+      const ext = editCoverFile.name.split(".").pop() || "jpg";
+      const path = `${community.id}/cover-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("communities")
+        .upload(path, editCoverFile, { contentType: editCoverFile.type, upsert: true });
+      if (upErr) {
+        setSavingMeta(false);
+        return toast.error(toUserMessage(upErr));
+      }
+      const { data: pub } = supabase.storage.from("communities").getPublicUrl(path);
+      cover_url = pub.publicUrl;
+    }
+    const { error } = await supabase
+      .from("communities")
+      .update({ name: editName.trim() || community.name, cover_url })
+      .eq("id", community.id);
+    setSavingMeta(false);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success("Community aktualisiert");
+    setEditOpen(false);
+    setEditCoverFile(null);
+    load();
+  };
+
+  const kickMember = async (memberUserId: string) => {
+    if (!community || !isAdmin) return;
+    if (memberUserId === user?.id) return toast.error("Du kannst dich nicht selbst kicken.");
+    const { error } = await supabase
+      .from("community_members")
+      .delete()
+      .eq("community_id", community.id)
+      .eq("user_id", memberUserId);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success("Mitglied entfernt.");
+    loadMembers();
+    load();
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    const { error } = await supabase.from("community_messages").delete().eq("id", messageId);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success("Nachricht gelöscht.");
+    loadMessages();
+  };
+
   const load = async () => {
     const { data: c } = await supabase
       .from("communities")
