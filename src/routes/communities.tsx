@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, ShieldAlert } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -119,6 +119,21 @@ function CommunitiesPage() {
             </DialogContent>
           </Dialog>
         )}
+      </div>
+
+      <div className="mb-8 rounded-2xl border border-yellow-500/30 bg-yellow-500/5 px-5 py-4">
+        <div className="flex items-start gap-3">
+          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-yellow-500" />
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-yellow-500">Community-Richtlinien</p>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Carforms Communities sind ein Ort für Leidenschaft, Respekt und Autokultur.
+              Illegale Straßenrennen, illegale Geschäfte sowie Hass, Diskriminierung und
+              Belästigung jeglicher Art sind hier absolut nicht toleriert.
+              Wer gegen diese Regeln verstößt, wird sofort und dauerhaft gebannt.
+            </p>
+          </div>
+        </div>
       </div>
 
       {items.length === 0 ? (
