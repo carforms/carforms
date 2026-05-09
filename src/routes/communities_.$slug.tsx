@@ -83,7 +83,7 @@ function CommunityDetail() {
   const load = async () => {
     const { data: c } = await supabase
       .from("communities")
-      .select("id,slug,name,description,cover_url")
+      .select("id,slug,name,description,cover_url,created_by")
       .eq("slug", slug)
       .maybeSingle();
     if (!c) throw notFound();
