@@ -297,15 +297,48 @@ function CommunityDetail() {
                     {!isOwn && (
                       <span className="px-1 text-xs text-muted-foreground">@{msg.profiles?.username ?? "user"}</span>
                     )}
-                    <div
-                      className={`rounded-2xl px-3.5 py-2 text-sm break-words whitespace-pre-wrap ${
-                        isOwn
-                          ? "bg-primary text-primary-foreground rounded-tr-sm"
-                          : "bg-secondary text-secondary-foreground rounded-tl-sm"
-                      }`}
-                    >
-                      {msg.body}
-                    </div>
+                    {msg.attachment_url && (
+                      isImageType(msg.attachment_type) ? (
+                        <a
+                          href={msg.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block overflow-hidden rounded-2xl border border-border/60 bg-background"
+                        >
+                          <img
+                            src={msg.attachment_url}
+                            alt={msg.attachment_name ?? "Anhang"}
+                            className="max-h-64 w-auto max-w-full object-cover"
+                            loading="lazy"
+                          />
+                        </a>
+                      ) : (
+                        <a
+                          href={msg.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download={msg.attachment_name ?? undefined}
+                          className="flex max-w-[260px] items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2 text-xs hover:bg-secondary/60"
+                        >
+                          <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium">{msg.attachment_name ?? "Datei"}</p>
+                            <p className="text-[10px] text-muted-foreground">{formatBytes(msg.attachment_size)}</p>
+                          </div>
+                        </a>
+                      )
+                    )}
+                    {msg.body && (
+                      <div
+                        className={`rounded-2xl px-3.5 py-2 text-sm break-words whitespace-pre-wrap ${
+                          isOwn
+                            ? "bg-primary text-primary-foreground rounded-tr-sm"
+                            : "bg-secondary text-secondary-foreground rounded-tl-sm"
+                        }`}
+                      >
+                        {msg.body}
+                      </div>
+                    )}
                     <span className="px-1 text-[10px] text-muted-foreground">
                       {new Date(msg.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                     </span>
