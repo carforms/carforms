@@ -4,7 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, Loader2, MessageCircle, Paperclip, Send, Users, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FileText, Loader2, MessageCircle, Paperclip, Pencil, Send, Shield, Trash2, UserMinus, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -18,6 +21,13 @@ type Community = {
   name: string;
   description: string | null;
   cover_url: string | null;
+  created_by: string | null;
+};
+
+type Member = {
+  user_id: string;
+  role: string;
+  profiles: { username: string; avatar_url: string | null } | null;
 };
 
 type Post = {
@@ -70,10 +80,88 @@ function CommunityDetail() {
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  const isAdmin = !!user && !!community && community.created_by === user.id;
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editCoverFile, setEditCoverFile] = useState<File | null>(null);
+  const [savingMeta, setSavingMeta] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
+  const [members, setMembers] = useState<Member[]>([]);
+
+  const loadMembers = async () => {
+    if (!community) return;
+    const { data } = await supabase
+      .from("community_members")
+      .select("user_id, role")
+      .eq("community_id", community.id);
+    if (!data) return;
+    const enriched = await Promise.all(
+      data.map(async (m) => {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username, avatar_url")
+          .eq("id", m.user_id)
+          .maybeSingle();
+        return { ...m, profiles: profile ?? null } as Member;
+      })
+    );
+    setMembers(enriched);
+  };
+
+  const saveMeta = async () => {
+    if (!community || !isAdmin) return;
+    setSavingMeta(true);
+    let cover_url = community.cover_url;
+    if (editCoverFile) {
+      const ext = editCoverFile.name.split(".").pop() || "jpg";
+      const path = `${community.id}/cover-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("communities")
+        .upload(path, editCoverFile, { contentType: editCoverFile.type, upsert: true });
+      if (upErr) {
+        setSavingMeta(false);
+        return toast.error(toUserMessage(upErr));
+      }
+      const { data: pub } = supabase.storage.from("communities").getPublicUrl(path);
+      cover_url = pub.publicUrl;
+    }
+    const { error } = await supabase
+      .from("communities")
+      .update({ name: editName.trim() || community.name, cover_url })
+      .eq("id", community.id);
+    setSavingMeta(false);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success("Community aktualisiert");
+    setEditOpen(false);
+    setEditCoverFile(null);
+    load();
+  };
+
+  const kickMember = async (memberUserId: string) => {
+    if (!community || !isAdmin) return;
+    if (memberUserId === user?.id) return toast.error("Du kannst dich nicht selbst kicken.");
+    const { error } = await supabase
+      .from("community_members")
+      .delete()
+      .eq("community_id", community.id)
+      .eq("user_id", memberUserId);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success("Mitglied entfernt.");
+    loadMembers();
+    load();
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    const { error } = await supabase.from("community_messages").delete().eq("id", messageId);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success("Nachricht gelöscht.");
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+  };
+
   const load = async () => {
     const { data: c } = await supabase
       .from("communities")
-      .select("id,slug,name,description,cover_url")
+      .select("id,slug,name,description,cover_url,created_by")
       .eq("slug", slug)
       .maybeSingle();
     if (!c) throw notFound();
@@ -243,13 +331,78 @@ function CommunityDetail() {
         </div>
         <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{community.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{community.name}</h1>
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                  <Shield className="h-3 w-3" /> Admin
+                </span>
+              )}
+            </div>
             {community.description && <p className="mt-1 text-sm text-muted-foreground">{community.description}</p>}
             <p className="mt-2 text-xs text-muted-foreground">{memberCount.toLocaleString("de-DE")} Mitglieder</p>
           </div>
-          <Button onClick={toggleJoin} variant={isMember ? "secondary" : "default"} className="rounded-full">
-            {isMember ? "Mitglied" : "Beitreten"}
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <>
+                <Dialog open={membersOpen} onOpenChange={(o) => { setMembersOpen(o); if (o) loadMembers(); }}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full">
+                      <Users className="h-4 w-4" /> Mitglieder
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Mitglieder verwalten</DialogTitle></DialogHeader>
+                    <ul className="max-h-80 space-y-2 overflow-y-auto">
+                      {members.map((m) => (
+                        <li key={m.user_id} className="flex items-center gap-3 rounded-lg border border-border/60 p-2">
+                          <Avatar className="h-8 w-8">
+                            {m.profiles?.avatar_url && <AvatarImage src={m.profiles.avatar_url} alt={m.profiles.username} />}
+                            <AvatarFallback className="text-xs">{m.profiles?.username?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">@{m.profiles?.username ?? "user"}</p>
+                            <p className="text-xs text-muted-foreground">{m.role}</p>
+                          </div>
+                          {m.user_id !== user?.id && (
+                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => kickMember(m.user_id)}>
+                              <UserMinus className="h-4 w-4" /> Kicken
+                            </Button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={editOpen} onOpenChange={(o) => { setEditOpen(o); if (o) { setEditName(community.name); setEditCoverFile(null); } }}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full">
+                      <Pencil className="h-4 w-4" /> Bearbeiten
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Community bearbeiten</DialogTitle></DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="cname">Name</Label>
+                        <Input id="cname" value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={60} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="ccover">Cover-Bild (Thumbnail)</Label>
+                        <Input id="ccover" type="file" accept="image/*" onChange={(e) => setEditCoverFile(e.target.files?.[0] ?? null)} />
+                      </div>
+                      <Button onClick={saveMeta} disabled={savingMeta} className="w-full rounded-full">
+                        {savingMeta ? <Loader2 className="h-4 w-4 animate-spin" /> : "Speichern"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
+            )}
+            <Button onClick={toggleJoin} variant={isMember ? "secondary" : "default"} className="rounded-full">
+              {isMember ? "Mitglied" : "Beitreten"}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -357,9 +510,21 @@ function CommunityDetail() {
                         {msg.body}
                       </div>
                     )}
-                    <span className="px-1 text-[10px] text-muted-foreground">
-                      {new Date(msg.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                    <div className="flex items-center gap-2 px-1">
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(msg.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      {(isOwn || isAdmin) && (
+                        <button
+                          type="button"
+                          onClick={() => deleteMessage(msg.id)}
+                          className="text-muted-foreground hover:text-destructive"
+                          aria-label="Nachricht löschen"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
