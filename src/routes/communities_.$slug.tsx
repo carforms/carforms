@@ -7,7 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileText, Loader2, MessageCircle, Paperclip, Pencil, Send, Shield, Trash2, UserMinus, Users, X } from "lucide-react";
+import { FileText, ImagePlus, Loader2, MessageCircle, Paperclip, Pencil, Send, Shield, Trash2, UserMinus, Users, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -87,6 +88,84 @@ function CommunityDetail() {
   const [savingMeta, setSavingMeta] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
+
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPostBody, setNewPostBody] = useState("");
+  const [postImage, setPostImage] = useState<File | null>(null);
+  const [postImagePreview, setPostImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [submittingPost, setSubmittingPost] = useState(false);
+
+  const loadPosts = async () => {
+    if (!community) return;
+    const { data: p } = await supabase
+      .from("posts")
+      .select("id,title,image_url,created_at,profiles:profiles!posts_author_id_fkey(username)")
+      .eq("community_id", community.id)
+      .order("created_at", { ascending: false });
+    setPosts((p as unknown as Post[]) ?? []);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Bild darf maximal 10MB groß sein.");
+      return;
+    }
+    if (postImagePreview) URL.revokeObjectURL(postImagePreview);
+    setPostImage(file);
+    setPostImagePreview(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!postImage || !user) return null;
+    setUploadingImage(true);
+    const fileExt = postImage.name.split(".").pop()?.toLowerCase() || "jpg";
+    const filePath = `community-posts/${user.id}/${Date.now()}.${fileExt}`;
+    const { error } = await supabase.storage
+      .from("community-images")
+      .upload(filePath, postImage, { upsert: true, contentType: postImage.type });
+    setUploadingImage(false);
+    if (error) {
+      toast.error("Bild konnte nicht hochgeladen werden: " + error.message);
+      return null;
+    }
+    const { data } = supabase.storage.from("community-images").getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  const handleSubmitPost = async () => {
+    if (!newPostTitle.trim() || !user || !community) return;
+    setSubmittingPost(true);
+    let image_url: string | null = null;
+    if (postImage) {
+      image_url = await uploadImage();
+      if (!image_url) {
+        setSubmittingPost(false);
+        return;
+      }
+    }
+    const { error } = await supabase.from("posts").insert({
+      title: newPostTitle.trim(),
+      body: newPostBody.trim() || null,
+      image_url,
+      author_id: user.id,
+      community_id: community.id,
+    });
+    setSubmittingPost(false);
+    if (error) {
+      toast.error("Beitrag konnte nicht erstellt werden.");
+      return;
+    }
+    setNewPostTitle("");
+    setNewPostBody("");
+    if (postImagePreview) URL.revokeObjectURL(postImagePreview);
+    setPostImage(null);
+    setPostImagePreview(null);
+    toast.success("Beitrag erstellt!");
+    loadPosts();
+  };
 
   const loadMembers = async () => {
     if (!community) return;
@@ -615,6 +694,61 @@ function CommunityDetail() {
       )}
 
       <h2 className="mt-10 mb-4 text-lg font-semibold">Beiträge</h2>
+
+      {isMember && user && (
+        <div className="mb-6 space-y-3 rounded-2xl border border-border/60 bg-card p-4">
+          <Input
+            value={newPostTitle}
+            onChange={(e) => setNewPostTitle(e.target.value)}
+            placeholder="Titel des Beitrags"
+            maxLength={120}
+          />
+          <Textarea
+            value={newPostBody}
+            onChange={(e) => setNewPostBody(e.target.value)}
+            placeholder="Was möchtest du teilen?"
+            rows={3}
+          />
+          <div className="flex items-center gap-3">
+            <label className="flex cursor-pointer items-center gap-2 rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent transition-colors">
+              <ImagePlus className="h-4 w-4" />
+              Bild hinzufügen
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+            </label>
+            {postImagePreview && (
+              <div className="relative">
+                <img src={postImagePreview} alt="Vorschau" className="h-16 w-16 rounded-xl object-cover" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (postImagePreview) URL.revokeObjectURL(postImagePreview);
+                    setPostImage(null);
+                    setPostImagePreview(null);
+                  }}
+                  className="absolute -right-2 -top-2 rounded-full bg-destructive p-0.5 text-white"
+                  aria-label="Bild entfernen"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            <Button
+              onClick={handleSubmitPost}
+              disabled={!newPostTitle.trim() || uploadingImage || submittingPost}
+              className="ml-auto rounded-full"
+              size="sm"
+            >
+              {uploadingImage ? "Wird hochgeladen..." : submittingPost ? "Wird gepostet..." : "Posten"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {posts.length === 0 ? (
         <p className="text-sm text-muted-foreground">Noch keine Beiträge in dieser Community.</p>
       ) : (
