@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
-import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/profile/edit")({
   component: EditProfilePage,
@@ -23,6 +23,7 @@ function EditProfilePage() {
   const [location, setLocation] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -37,20 +38,53 @@ function EditProfilePage() {
     }
   }, [profile]);
 
+  const handleAvatarUpload = async (file: File) => {
+    if (!user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Bild darf maximal 5MB groß sein.");
+      return;
+    }
+
+    setUploading(true);
+    const fileExt = file.name.split(".").pop();
+    const filePath = `${user.id}/avatar.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      toast.error(toUserMessage(uploadError, "Bild konnte nicht hochgeladen werden."));
+      setUploading(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    const publicUrl = data.publicUrl + "?t=" + Date.now();
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ avatar_url: publicUrl })
+      .eq("id", user.id);
+
+    if (updateError) {
+      toast.error(toUserMessage(updateError, "Profil konnte nicht aktualisiert werden."));
+      setUploading(false);
+      return;
+    }
+
+    setAvatarUrl(publicUrl);
+    await refreshProfile();
+    toast.success("Profilbild aktualisiert!");
+    setUploading(false);
+  };
+
   const onAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
-    const err = validateImageFile(file);
-    if (err) {
-      e.target.value = "";
-      return toast.error(err);
-    }
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (error) return toast.error(toUserMessage(error, "Avatar konnte nicht hochgeladen werden."));
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    setAvatarUrl(data.publicUrl);
+    e.target.value = "";
+    if (file) await handleAvatarUpload(file);
   };
 
   const save = async (e: React.FormEvent) => {
@@ -73,15 +107,28 @@ function EditProfilePage() {
       <h1 className="text-2xl font-bold">Profil bearbeiten</h1>
       <form onSubmit={save} className="mt-6 space-y-6">
         <div className="flex items-center gap-4">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={avatarUrl ?? undefined} />
-            <AvatarFallback>{profile?.username?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
-          </Avatar>
-          <label className="cursor-pointer">
+          <div className="relative">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={avatarUrl ?? undefined} />
+              <AvatarFallback>{profile?.username?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
+            </Avatar>
+            {uploading && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-background/70 backdrop-blur-sm">
+                <Loader2 className="h-5 w-5 animate-spin text-foreground" />
+              </div>
+            )}
+          </div>
+          <label className={`cursor-pointer ${uploading ? "pointer-events-none opacity-50" : ""}`}>
             <span className="inline-flex items-center justify-center rounded-full border border-border bg-secondary px-4 py-2 text-sm hover:bg-accent">
-              Avatar ändern
+              {uploading ? "Lädt hoch…" : "Avatar ändern"}
             </span>
-            <input type="file" accept="image/*" className="hidden" onChange={onAvatar} />
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={onAvatar}
+              disabled={uploading}
+            />
           </label>
         </div>
 
