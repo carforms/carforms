@@ -27,7 +27,8 @@ type Community = {
   name: string;
   description: string | null;
   cover_url: string | null;
-  community_members: { user_id: string }[];
+  member_count: number;
+  is_member: boolean;
 };
 
 function CommunitiesPage() {
@@ -39,19 +40,46 @@ function CommunitiesPage() {
   const [description, setDescription] = useState("");
 
   const load = async () => {
-    const { data } = await supabase
+    const { data: communities } = await supabase
       .from("communities")
-      .select("id,slug,name,description,cover_url,community_members(user_id)")
+      .select("id,slug,name,description,cover_url")
       .order("created_at", { ascending: false });
-    setItems((data as unknown as Community[]) ?? []);
+    if (!communities) {
+      setItems([]);
+      return;
+    }
+    const enriched = await Promise.all(
+      communities.map(async (c) => {
+        const [{ count }, membership] = await Promise.all([
+          supabase
+            .from("community_members")
+            .select("*", { count: "exact", head: true })
+            .eq("community_id", c.id),
+          user
+            ? supabase
+                .from("community_members")
+                .select("user_id")
+                .eq("community_id", c.id)
+                .eq("user_id", user.id)
+                .maybeSingle()
+            : Promise.resolve({ data: null }),
+        ]);
+        return {
+          ...c,
+          member_count: count ?? 0,
+          is_member: !!membership.data,
+        };
+      })
+    );
+    setItems(enriched as Community[]);
   };
   useEffect(() => {
     load();
-  }, []);
+  }, [user?.id]);
 
   const toggleJoin = async (c: Community) => {
     if (!user) return navigate({ to: "/login" });
-    const isMember = c.community_members.some((m) => m.user_id === user.id);
+    const isMember = c.is_member;
     if (isMember) {
       const { error } = await supabase.from("community_members").delete().eq("community_id", c.id).eq("user_id", user.id);
       if (error) return toast.error(toUserMessage(error));
@@ -143,7 +171,7 @@ function CommunitiesPage() {
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((c) => {
-            const isMember = !!user && c.community_members.some((m) => m.user_id === user.id);
+            const isMember = c.is_member;
             return (
               <li key={c.id} className="group overflow-hidden rounded-2xl border border-border/60 bg-card transition-colors hover:border-border">
                 <Link to="/communities/$slug" params={{ slug: c.slug }} className="block">
@@ -168,7 +196,7 @@ function CommunitiesPage() {
                   </div>
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-xs text-muted-foreground">
-                      {c.community_members.length.toLocaleString("de-DE")} Mitglieder
+                      {c.member_count.toLocaleString("de-DE")} Mitglieder
                     </span>
                     <Button
                       size="sm"
