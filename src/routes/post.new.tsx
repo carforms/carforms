@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
+import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/post/new")({
   component: NewPostPage,
@@ -57,25 +58,16 @@ function NewPostPage() {
       e.target.value = "";
       return toast.error("Du musst angemeldet sein, um Bilder hochzuladen.");
     }
-    if (file.size > 10 * 1024 * 1024) {
+    const validationError = validateImageFile(file);
+    if (validationError) {
       e.target.value = "";
-      return toast.error("Bild darf maximal 10MB groß sein.");
+      return toast.error(validationError);
     }
-    const allowedTypes = ["jpg", "jpeg", "png", "webp", "gif"];
-    const rawExt = file.name.includes(".") ? file.name.split(".").pop()?.toLowerCase() : undefined;
-    const mimeExt = file.type?.split("/")[1]?.toLowerCase();
-    const fileExt = rawExt && allowedTypes.includes(rawExt) ? rawExt : mimeExt;
-    if (!fileExt) {
-      e.target.value = "";
-      return toast.error("Dateityp konnte nicht erkannt werden. Bitte JPG, PNG, WEBP oder GIF wählen.");
-    }
-    if (!allowedTypes.includes(fileExt)) {
-      e.target.value = "";
-      return toast.error(`Dateityp "${fileExt}" wird nicht unterstützt. Erlaubt: JPG, PNG, WEBP, GIF.`);
-    }
+    const mimeExt = file.type.split("/")[1]?.toLowerCase() ?? "jpg";
+    const fileExt = mimeExt === "jpeg" ? "jpg" : mimeExt;
     setPreview(URL.createObjectURL(file));
     setUploading(true);
-    const filePath = `posts/${user.id}/${Date.now()}.${fileExt}`;
+    const filePath = `${user.id}/${Date.now()}.${fileExt}`;
     try {
       const { error: uploadError } = await supabase.storage
         .from("post-images")

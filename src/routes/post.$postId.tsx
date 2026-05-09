@@ -8,6 +8,7 @@ import { Heart, MessageCircle, ArrowLeft, Trash2, ImagePlus, X } from "lucide-re
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
+import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/post/$postId")({
   component: PostDetailPage,
@@ -123,9 +124,18 @@ function PostDetailPage() {
     setBusy(true);
     let imageUrl: string | null = null;
     if (commentImage) {
-      const ext = commentImage.name.split(".").pop() ?? "jpg";
-      const path = `comments/${postId}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("post-images").upload(path, commentImage);
+      const validationError = validateImageFile(commentImage);
+      if (validationError) {
+        setBusy(false);
+        toast.error(validationError);
+        return;
+      }
+      const mimeExt = commentImage.type.split("/")[1]?.toLowerCase() ?? "jpg";
+      const ext = mimeExt === "jpeg" ? "jpg" : mimeExt;
+      const path = `${user.id}/comments/${postId}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("post-images")
+        .upload(path, commentImage, { contentType: commentImage.type });
       if (upErr) {
         setBusy(false);
         toast.error(toUserMessage(upErr));
