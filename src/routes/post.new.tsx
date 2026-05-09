@@ -54,26 +54,34 @@ function NewPostPage() {
   const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!user) {
-      e.target.value = "";
-      return toast.error("Du musst angemeldet sein, um Bilder hochzuladen.");
-    }
     const validationError = validateImageFile(file);
     if (validationError) {
       e.target.value = "";
       return toast.error(validationError);
     }
-    const mimeExt = file.type.split("/")[1]?.toLowerCase() ?? "jpg";
-    const fileExt = mimeExt === "jpeg" ? "jpg" : mimeExt;
     setPreview(URL.createObjectURL(file));
     setUploading(true);
-    const filePath = `${user.id}/${Date.now()}.${fileExt}`;
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        toast.error("Bitte melde dich erneut an.");
+        setPreview(null);
+        return;
+      }
+
+      const mimeExt = file.type.split("/")[1]?.toLowerCase() ?? "jpg";
+      const fileNameExt = file.name.split(".").pop()?.toLowerCase();
+      const fileExt = fileNameExt || (mimeExt === "jpeg" ? "jpg" : mimeExt);
+      const filePath = `${session.user.id}/posts/${Date.now()}.${fileExt}`;
+
       const { error: uploadError } = await supabase.storage
         .from("post-images")
         .upload(filePath, file, { upsert: true, contentType: file.type || `image/${fileExt}` });
       if (uploadError) {
-        console.error("UPLOAD ERROR (post-images):", JSON.stringify(uploadError));
+        console.error("UPLOAD ERROR:", uploadError);
         const msg = uploadError.message?.toLowerCase() ?? "";
         if (msg.includes("row-level security") || msg.includes("unauthorized") || msg.includes("permission")) {
           toast.error("Keine Berechtigung zum Hochladen. Bitte erneut anmelden und nochmal versuchen.");
