@@ -114,9 +114,14 @@ export function Header() {
               </DropdownMenu>
             </>
           ) : (
-            <Button size="sm" className="rounded-full" onClick={() => navigate({ to: "/login" })}>
-              Anmelden
-            </Button>
+            <>
+              <Button size="sm" variant="ghost" className="rounded-full" onClick={() => navigate({ to: "/login" })}>
+                Anmelden
+              </Button>
+              <Button size="sm" className="rounded-full" onClick={() => navigate({ to: "/signup" })}>
+                Registrieren
+              </Button>
+            </>
           )}
         </nav>
       </div>
