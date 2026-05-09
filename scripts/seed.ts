@@ -104,7 +104,6 @@ async function main() {
   console.log(`Created ${profileIds.length} auth users + profiles.`);
 
   console.log("Inserting posts…");
-  const profileIds = profileRows.map((p) => p.id);
 
   const postRows = posts.map((post) => ({
     author_id: profileIds[Math.floor(Math.random() * profileIds.length)],
