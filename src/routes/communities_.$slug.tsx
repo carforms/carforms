@@ -4,7 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, Loader2, MessageCircle, Paperclip, Send, Users, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FileText, Loader2, MessageCircle, Paperclip, Pencil, Send, Shield, Trash2, UserMinus, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -18,6 +21,13 @@ type Community = {
   name: string;
   description: string | null;
   cover_url: string | null;
+  created_by: string | null;
+};
+
+type Member = {
+  user_id: string;
+  role: string;
+  profiles: { username: string; avatar_url: string | null } | null;
 };
 
 type Post = {
