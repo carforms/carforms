@@ -30,11 +30,28 @@ type Post = {
 
 type Message = {
   id: string;
-  body: string;
+  body: string | null;
   created_at: string;
   user_id: string;
+  attachment_url: string | null;
+  attachment_type: string | null;
+  attachment_name: string | null;
+  attachment_size: number | null;
   profiles: { username: string; avatar_url: string | null } | null;
 };
+
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10 MB
+
+function isImageType(mime: string | null): boolean {
+  return !!mime && mime.startsWith("image/");
+}
+
+function formatBytes(bytes: number | null): string {
+  if (!bytes && bytes !== 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 function CommunityDetail() {
   const { slug } = Route.useParams();
