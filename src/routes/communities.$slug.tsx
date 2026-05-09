@@ -254,16 +254,19 @@ function CommunityDetail() {
       </div>
 
       {isMember && (
-        <div className="mt-6">
-          <Button
-            onClick={() => setChatOpen(!chatOpen)}
-            variant="outline"
-            className="rounded-full gap-2"
-          >
-            <MessageCircle className="h-4 w-4" />
-            {chatOpen ? "Chat schließen" : "Community Chat"}
-          </Button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setChatOpen(!chatOpen)}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+        >
+          <MessageCircle className="h-4 w-4" />
+          {chatOpen ? "Chat schließen" : "Community Chat"}
+          {!chatOpen && messages.length > 0 && (
+            <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-[10px] font-bold text-foreground">
+              {messages.length > 99 ? "99+" : messages.length}
+            </span>
+          )}
+        </button>
       )}
 
       {chatOpen && (
