@@ -196,7 +196,7 @@ function CommunitiesPage() {
                   </div>
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-xs text-muted-foreground">
-                      {c.community_members.length.toLocaleString("de-DE")} Mitglieder
+                      {c.member_count.toLocaleString("de-DE")} Mitglieder
                     </span>
                     <Button
                       size="sm"
