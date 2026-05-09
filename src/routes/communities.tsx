@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -173,23 +173,23 @@ function CommunitiesPage() {
           {items.map((c) => {
             const isMember = c.is_member;
             return (
-              <li key={c.id} className="group overflow-hidden rounded-2xl border border-border/60 bg-card transition-colors hover:border-border">
-                <Link to="/communities/$slug" params={{ slug: c.slug }} className="block">
-                  <div className="aspect-[16/9] w-full overflow-hidden bg-secondary">
-                    {c.cover_url ? (
-                      <img src={c.cover_url} alt={c.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                        <Users className="h-10 w-10" />
-                      </div>
-                    )}
-                  </div>
-                </Link>
+              <li
+                key={c.id}
+                onClick={() => navigate({ to: "/communities/$slug", params: { slug: c.slug } })}
+                className="group cursor-pointer overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-border hover:shadow-md"
+              >
+                <div className="aspect-[16/9] w-full overflow-hidden bg-secondary">
+                  {c.cover_url ? (
+                    <img src={c.cover_url} alt={c.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                      <Users className="h-10 w-10" />
+                    </div>
+                  )}
+                </div>
                 <div className="space-y-3 p-5">
                   <div>
-                    <Link to="/communities/$slug" params={{ slug: c.slug }} className="text-base font-semibold hover:underline">
-                      {c.name}
-                    </Link>
+                    <span className="text-base font-semibold group-hover:underline">{c.name}</span>
                     {c.description && (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{c.description}</p>
                     )}
@@ -202,7 +202,10 @@ function CommunitiesPage() {
                       size="sm"
                       variant={isMember ? "secondary" : "default"}
                       className="rounded-full"
-                      onClick={() => toggleJoin(c)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleJoin(c);
+                      }}
                     >
                       {isMember ? "Mitglied" : "Beitreten"}
                     </Button>
