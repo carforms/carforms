@@ -23,7 +23,7 @@ export const Route = createFileRoute("/post/new")({
 });
 
 function NewPostPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -34,8 +34,8 @@ function NewPostPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
-  }, [loading, user, navigate]);
+    if (!user && !authLoading) navigate({ to: "/login" });
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (!user) return;
