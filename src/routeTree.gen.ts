@@ -12,8 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CommunitiesIndexRouteImport } from './routes/communities.index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
 import { Route as PostNewRouteImport } from './routes/post.new'
@@ -38,14 +38,14 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunitiesRoute = CommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunitiesIndexRoute = CommunitiesIndexRouteImport.update({
-  id: '/communities/',
-  path: '/communities/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileEditRoute = ProfileEditRouteImport.update({
@@ -92,6 +92,7 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
@@ -100,13 +101,13 @@ export interface FileRoutesByFullPath {
   '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
   '/profile/edit': typeof ProfileEditRoute
-  '/communities/': typeof CommunitiesIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
@@ -115,7 +116,6 @@ export interface FileRoutesByTo {
   '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
   '/profile/edit': typeof ProfileEditRoute
-  '/communities': typeof CommunitiesIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -123,6 +123,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
@@ -131,7 +132,6 @@ export interface FileRoutesById {
   '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
   '/profile/edit': typeof ProfileEditRoute
-  '/communities/': typeof CommunitiesIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -140,6 +140,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/communities'
     | '/login'
     | '/search'
     | '/signup'
@@ -148,13 +149,13 @@ export interface FileRouteTypes {
     | '/post/new'
     | '/profile/$username'
     | '/profile/edit'
-    | '/communities/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/communities'
     | '/login'
     | '/search'
     | '/signup'
@@ -163,13 +164,13 @@ export interface FileRouteTypes {
     | '/post/new'
     | '/profile/$username'
     | '/profile/edit'
-    | '/communities'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
+    | '/communities'
     | '/login'
     | '/search'
     | '/signup'
@@ -178,7 +179,6 @@ export interface FileRouteTypes {
     | '/post/new'
     | '/profile/$username'
     | '/profile/edit'
-    | '/communities/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -186,6 +186,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CommunitiesRoute: typeof CommunitiesRouteWithChildren
   LoginRoute: typeof LoginRoute
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
@@ -193,7 +194,6 @@ export interface RootRouteChildren {
   PostNewRoute: typeof PostNewRoute
   ProfileUsernameRoute: typeof ProfileUsernameRoute
   ProfileEditRoute: typeof ProfileEditRoute
-  CommunitiesIndexRoute: typeof CommunitiesIndexRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -222,18 +222,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communities': {
+      id: '/communities'
+      path: '/communities'
+      fullPath: '/communities'
+      preLoaderRoute: typeof CommunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/communities/': {
-      id: '/communities/'
-      path: '/communities'
-      fullPath: '/communities/'
-      preLoaderRoute: typeof CommunitiesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/edit': {
@@ -295,8 +295,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CommunitiesRouteChildren {
+  CommunitiesSlugRoute: typeof CommunitiesSlugRoute
+}
+
+const CommunitiesRouteChildren: CommunitiesRouteChildren = {
+  CommunitiesSlugRoute: CommunitiesSlugRoute,
+}
+
+const CommunitiesRouteWithChildren = CommunitiesRoute._addFileChildren(
+  CommunitiesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CommunitiesRoute: CommunitiesRouteWithChildren,
   LoginRoute: LoginRoute,
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
@@ -304,7 +317,6 @@ const rootRouteChildren: RootRouteChildren = {
   PostNewRoute: PostNewRoute,
   ProfileUsernameRoute: ProfileUsernameRoute,
   ProfileEditRoute: ProfileEditRoute,
-  CommunitiesIndexRoute: CommunitiesIndexRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
