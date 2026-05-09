@@ -75,6 +75,15 @@ export function Header() {
               <Button
                 size="sm"
                 variant="secondary"
+                className="rounded-full sm:hidden"
+                aria-label="Neuer Beitrag"
+                onClick={() => navigate({ to: "/post/new" })}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
                 className="hidden rounded-full sm:inline-flex"
                 onClick={() => navigate({ to: "/post/new" })}
               >
