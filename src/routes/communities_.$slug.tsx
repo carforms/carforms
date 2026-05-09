@@ -155,7 +155,7 @@ function CommunityDetail() {
     const { error } = await supabase.from("community_messages").delete().eq("id", messageId);
     if (error) return toast.error(toUserMessage(error));
     toast.success("Nachricht gelöscht.");
-    loadMessages();
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
   };
 
   const load = async () => {
