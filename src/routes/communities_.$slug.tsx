@@ -193,15 +193,16 @@ function CommunityDetail() {
     let cover_url = community.cover_url;
     if (editCoverFile) {
       const ext = editCoverFile.name.split(".").pop() || "jpg";
-      const path = `${community.id}/cover-${Date.now()}.${ext}`;
+      const path = `covers/${community.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
-        .from("communities")
+        .from("community-covers")
         .upload(path, editCoverFile, { contentType: editCoverFile.type, upsert: true });
       if (upErr) {
+        console.error("Cover upload error:", upErr.message);
         setSavingMeta(false);
-        return toast.error(toUserMessage(upErr));
+        return toast.error("Bild konnte nicht hochgeladen werden: " + upErr.message);
       }
-      const { data: pub } = supabase.storage.from("communities").getPublicUrl(path);
+      const { data: pub } = supabase.storage.from("community-covers").getPublicUrl(path);
       cover_url = pub.publicUrl;
     }
     const { error } = await supabase
