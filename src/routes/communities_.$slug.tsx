@@ -89,6 +89,84 @@ function CommunityDetail() {
   const [membersOpen, setMembersOpen] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
 
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPostBody, setNewPostBody] = useState("");
+  const [postImage, setPostImage] = useState<File | null>(null);
+  const [postImagePreview, setPostImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [submittingPost, setSubmittingPost] = useState(false);
+
+  const loadPosts = async () => {
+    if (!community) return;
+    const { data: p } = await supabase
+      .from("posts")
+      .select("id,title,image_url,created_at,profiles:profiles!posts_author_id_fkey(username)")
+      .eq("community_id", community.id)
+      .order("created_at", { ascending: false });
+    setPosts((p as unknown as Post[]) ?? []);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Bild darf maximal 10MB groß sein.");
+      return;
+    }
+    if (postImagePreview) URL.revokeObjectURL(postImagePreview);
+    setPostImage(file);
+    setPostImagePreview(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!postImage || !user) return null;
+    setUploadingImage(true);
+    const fileExt = postImage.name.split(".").pop()?.toLowerCase() || "jpg";
+    const filePath = `community-posts/${user.id}/${Date.now()}.${fileExt}`;
+    const { error } = await supabase.storage
+      .from("community-images")
+      .upload(filePath, postImage, { upsert: true, contentType: postImage.type });
+    setUploadingImage(false);
+    if (error) {
+      toast.error("Bild konnte nicht hochgeladen werden: " + error.message);
+      return null;
+    }
+    const { data } = supabase.storage.from("community-images").getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  const handleSubmitPost = async () => {
+    if (!newPostTitle.trim() || !user || !community) return;
+    setSubmittingPost(true);
+    let image_url: string | null = null;
+    if (postImage) {
+      image_url = await uploadImage();
+      if (!image_url) {
+        setSubmittingPost(false);
+        return;
+      }
+    }
+    const { error } = await supabase.from("posts").insert({
+      title: newPostTitle.trim(),
+      body: newPostBody.trim() || null,
+      image_url,
+      author_id: user.id,
+      community_id: community.id,
+    });
+    setSubmittingPost(false);
+    if (error) {
+      toast.error("Beitrag konnte nicht erstellt werden.");
+      return;
+    }
+    setNewPostTitle("");
+    setNewPostBody("");
+    if (postImagePreview) URL.revokeObjectURL(postImagePreview);
+    setPostImage(null);
+    setPostImagePreview(null);
+    toast.success("Beitrag erstellt!");
+    loadPosts();
+  };
+
   const loadMembers = async () => {
     if (!community) return;
     const { data } = await supabase
