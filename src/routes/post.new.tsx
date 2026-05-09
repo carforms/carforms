@@ -73,7 +73,7 @@ function NewPostPage() {
         .from("post-images")
         .upload(filePath, file, { upsert: true, contentType: file.type || `image/${fileExt}` });
       if (uploadError) {
-        console.error("Upload error:", uploadError);
+        console.error("UPLOAD ERROR (post-images):", JSON.stringify(uploadError));
         const msg = uploadError.message?.toLowerCase() ?? "";
         if (msg.includes("row-level security") || msg.includes("unauthorized") || msg.includes("permission")) {
           toast.error("Keine Berechtigung zum Hochladen. Bitte erneut anmelden und nochmal versuchen.");
