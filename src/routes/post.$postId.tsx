@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, ArrowLeft, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, ArrowLeft, Trash2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -25,6 +25,7 @@ type PostDetail = {
 type Comment = {
   id: string;
   body: string;
+  image_url: string | null;
   created_at: string;
   user_id: string;
   profiles: { username: string; display_name: string | null; avatar_url: string | null } | null;
@@ -39,6 +40,9 @@ function PostDetailPage() {
   const [likes, setLikes] = useState<{ user_id: string }[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [comment, setComment] = useState("");
+  const [commentImage, setCommentImage] = useState<File | null>(null);
+  const [commentImagePreview, setCommentImagePreview] = useState<string | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function load() {
@@ -58,7 +62,7 @@ function PostDetailPage() {
       supabase.from("post_likes").select("user_id").eq("post_id", postData.id),
       supabase
         .from("post_comments")
-        .select("id,body,created_at,user_id")
+        .select("id,body,image_url,created_at,user_id")
         .eq("post_id", postData.id)
         .order("created_at", { ascending: true }),
     ]);
@@ -114,16 +118,31 @@ function PostDetailPage() {
       navigate({ to: "/login" });
       return;
     }
-    if (!comment.trim()) return;
+    if (!comment.trim() && !commentImage) return;
     setBusy(true);
+    let imageUrl: string | null = null;
+    if (commentImage) {
+      const ext = commentImage.name.split(".").pop() ?? "jpg";
+      const path = `comments/${postId}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("post-images").upload(path, commentImage);
+      if (upErr) {
+        setBusy(false);
+        toast.error(toUserMessage(upErr));
+        return;
+      }
+      imageUrl = supabase.storage.from("post-images").getPublicUrl(path).data.publicUrl;
+    }
     const { error } = await supabase
       .from("post_comments")
-      .insert({ post_id: postId, user_id: user.id, body: comment.trim() });
+      .insert({ post_id: postId, user_id: user.id, body: comment.trim(), image_url: imageUrl });
     setBusy(false);
     if (error) {
       toast.error(toUserMessage(error));
     } else {
       setComment("");
+      if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
+      setCommentImage(null);
+      setCommentImagePreview(null);
       load();
     }
   }
@@ -235,17 +254,51 @@ function PostDetailPage() {
       <section className="mt-6 space-y-4">
         <h2 className="text-sm font-semibold">Kommentare</h2>
         {user ? (
-          <form onSubmit={submitComment} className="flex gap-2">
-            <input
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Kommentar schreiben…"
-              maxLength={500}
-              className="h-10 flex-1 rounded-full border border-border/60 bg-card/60 px-4 text-sm outline-none focus:border-border"
-            />
-            <Button type="submit" size="sm" className="rounded-full" disabled={busy || !comment.trim()}>
-              Senden
-            </Button>
+          <form onSubmit={submitComment} className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Kommentar schreiben…"
+                maxLength={500}
+                className="h-10 flex-1 rounded-full border border-border/60 bg-card/60 px-4 text-sm outline-none focus:border-border"
+              />
+              <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                <ImagePlus className="h-4 w-4" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] ?? null;
+                    if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
+                    setCommentImage(file);
+                    setCommentImagePreview(file ? URL.createObjectURL(file) : null);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <Button type="submit" size="sm" className="rounded-full" disabled={busy || (!comment.trim() && !commentImage)}>
+                Senden
+              </Button>
+            </div>
+            {commentImagePreview && (
+              <div className="relative inline-block">
+                <img src={commentImagePreview} alt="Vorschau" className="h-20 w-20 rounded-xl object-cover" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    URL.revokeObjectURL(commentImagePreview);
+                    setCommentImage(null);
+                    setCommentImagePreview(null);
+                  }}
+                  aria-label="Bild entfernen"
+                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-background text-foreground shadow ring-1 ring-border hover:bg-accent"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
           </form>
         ) : (
           <p className="text-xs text-muted-foreground">
@@ -295,12 +348,37 @@ function PostDetailPage() {
                     )}
                   </div>
                   <p className="mt-0.5 whitespace-pre-line text-sm">{c.body}</p>
+                  {c.image_url && (
+                    <img
+                      src={c.image_url}
+                      alt="Kommentar-Bild"
+                      onClick={() => setLightboxUrl(c.image_url)}
+                      className="mt-2 max-w-[240px] cursor-pointer rounded-xl object-cover"
+                    />
+                  )}
                 </div>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {lightboxUrl && (
+        <div
+          onClick={() => setLightboxUrl(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxUrl(null)}
+            aria-label="Schließen"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-background/10 text-white hover:bg-background/20"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img src={lightboxUrl} alt="Kommentar-Bild" className="max-h-full max-w-full rounded-lg object-contain" />
+        </div>
+      )}
     </main>
   );
 }
