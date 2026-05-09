@@ -171,7 +171,7 @@ function CommunitiesPage() {
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((c) => {
-            const isMember = !!user && c.community_members.some((m) => m.user_id === user.id);
+            const isMember = c.is_member;
             return (
               <li key={c.id} className="group overflow-hidden rounded-2xl border border-border/60 bg-card transition-colors hover:border-border">
                 <Link to="/communities/$slug" params={{ slug: c.slug }} className="block">
