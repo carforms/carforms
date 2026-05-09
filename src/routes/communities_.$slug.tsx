@@ -122,13 +122,14 @@ function CommunityDetail() {
     if (!postImage || !user) return null;
     setUploadingImage(true);
     const fileExt = postImage.name.split(".").pop()?.toLowerCase() || "jpg";
-    const filePath = `community-posts/${user.id}/${Date.now()}.${fileExt}`;
+    const filePath = `${user.id}/community-posts/${Date.now()}.${fileExt}`;
     const { error } = await supabase.storage
       .from("community-images")
       .upload(filePath, postImage, { upsert: true, contentType: postImage.type });
     setUploadingImage(false);
     if (error) {
-      toast.error("Bild konnte nicht hochgeladen werden: " + error.message);
+      console.error("UPLOAD ERROR (community-images):", JSON.stringify(error));
+      toast.error("Upload fehlgeschlagen: " + error.message);
       return null;
     }
     const { data } = supabase.storage.from("community-images").getPublicUrl(filePath);
