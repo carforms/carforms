@@ -32,6 +32,7 @@ function NewPostPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user && !authLoading) navigate({ to: "/login" });
