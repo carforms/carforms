@@ -27,7 +27,8 @@ type Community = {
   name: string;
   description: string | null;
   cover_url: string | null;
-  community_members: { user_id: string }[];
+  member_count: number;
+  is_member: boolean;
 };
 
 function CommunitiesPage() {
