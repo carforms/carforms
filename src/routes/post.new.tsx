@@ -77,11 +77,16 @@ function NewPostPage() {
       const fileExt = fileNameExt || (mimeExt === "jpeg" ? "jpg" : mimeExt);
       const filePath = `${session.user.id}/posts/${Date.now()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("post-images")
-        .upload(filePath, file, { upsert: true, contentType: file.type || `image/${fileExt}` });
+      const { error: uploadError } = await supabase.storage.from("post-images").upload(filePath, file, {
+        upsert: true,
+        contentType: file.type || `image/${fileExt}`,
+        duplex: "half",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
       if (uploadError) {
-        console.error("UPLOAD ERROR:", uploadError);
+        console.error("UPLOAD ERROR (post-images):", JSON.stringify(uploadError));
         const msg = uploadError.message?.toLowerCase() ?? "";
         if (
           msg.includes("row-level security") ||
