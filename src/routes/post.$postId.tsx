@@ -301,9 +301,17 @@ function PostDetailPage() {
             )}
           </form>
         ) : (
-          <p className="text-xs text-muted-foreground">
-            <Link to="/login" className="underline">Melde dich an</Link>, um zu kommentieren.
-          </p>
+          <div className="rounded-2xl border border-border/60 bg-card p-5 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">Melde dich an um zu kommentieren</p>
+            <div className="flex justify-center gap-3">
+              <Button variant="outline" size="sm" className="rounded-full" asChild>
+                <Link to="/login">Anmelden</Link>
+              </Button>
+              <Button size="sm" className="rounded-full" asChild>
+                <Link to="/signup">Registrieren</Link>
+              </Button>
+            </div>
+          </div>
         )}
 
         {comments.length === 0 ? (
