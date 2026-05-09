@@ -1,9 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MessageCircle, Send, Users } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -27,6 +28,14 @@ type Post = {
   profiles: { username: string } | null;
 };
 
+type Message = {
+  id: string;
+  body: string;
+  created_at: string;
+  user_id: string;
+  profiles: { username: string; avatar_url: string | null } | null;
+};
+
 function CommunityDetail() {
   const { slug } = Route.useParams();
   const { user } = useAuth();
@@ -34,6 +43,11 @@ function CommunityDetail() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [memberCount, setMemberCount] = useState(0);
   const [isMember, setIsMember] = useState(false);
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const load = async () => {
     const { data: c } = await supabase
@@ -79,6 +93,65 @@ function CommunityDetail() {
     load();
   };
 
+  const loadMessages = async () => {
+    if (!community) return;
+    const { data } = await supabase
+      .from("community_messages")
+      .select("id,body,created_at,user_id")
+      .eq("community_id", community.id)
+      .order("created_at", { ascending: true })
+      .limit(100);
+
+    if (!data) return;
+
+    const enriched = await Promise.all(
+      data.map(async (msg) => {
+        if (!msg.user_id) return { ...msg, user_id: "", profiles: null };
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username,avatar_url")
+          .eq("id", msg.user_id)
+          .maybeSingle();
+        return { ...msg, user_id: msg.user_id, profiles: profile ?? null };
+      })
+    );
+    setMessages(enriched as Message[]);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+  };
+
+  useEffect(() => {
+    if (!chatOpen || !community) return;
+    loadMessages();
+    const channel = supabase
+      .channel("community-chat-" + community.id)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "community_messages",
+          filter: "community_id=eq." + community.id,
+        },
+        () => loadMessages()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatOpen, community?.id]);
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !user || !community) return;
+    const { error } = await supabase.from("community_messages").insert({
+      community_id: community.id,
+      user_id: user.id,
+      body: newMessage.trim(),
+    });
+    if (error) return toast.error(toUserMessage(error));
+    setNewMessage("");
+  };
+
   if (!community) return <main className="mx-auto max-w-4xl p-8 text-sm text-muted-foreground">Lade…</main>;
 
   return (
@@ -104,6 +177,104 @@ function CommunityDetail() {
           </Button>
         </div>
       </div>
+
+      {isMember && (
+        <div className="mt-6">
+          <Button
+            onClick={() => setChatOpen(!chatOpen)}
+            variant="outline"
+            className="rounded-full gap-2"
+          >
+            <MessageCircle className="h-4 w-4" />
+            {chatOpen ? "Chat schließen" : "Community Chat"}
+          </Button>
+        </div>
+      )}
+
+      {chatOpen && (
+        <section className="mt-4 overflow-hidden rounded-2xl border border-border/60 bg-card">
+          <div className="flex items-center gap-2 border-b border-border/60 px-5 py-3">
+            <MessageCircle className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold">Community Chat</h2>
+            <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-500">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Live
+            </span>
+          </div>
+
+          <div className="flex h-[420px] flex-col gap-3 overflow-y-auto p-5">
+            {messages.length === 0 && (
+              <div className="m-auto text-center text-sm text-muted-foreground">
+                Noch keine Nachrichten. Starte die Konversation!
+              </div>
+            )}
+            {messages.map((msg) => {
+              const isOwn = msg.user_id === user?.id;
+              return (
+                <div key={msg.id} className={`flex gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+                  <Avatar className="h-8 w-8 shrink-0">
+                    {msg.profiles?.avatar_url && <AvatarImage src={msg.profiles.avatar_url} alt={msg.profiles.username} />}
+                    <AvatarFallback className="text-xs">
+                      {msg.profiles?.username?.[0]?.toUpperCase() ?? "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className={`flex max-w-[75%] flex-col gap-0.5 ${isOwn ? "items-end" : "items-start"}`}>
+                    {!isOwn && (
+                      <span className="px-1 text-xs text-muted-foreground">@{msg.profiles?.username ?? "user"}</span>
+                    )}
+                    <div
+                      className={`rounded-2xl px-3.5 py-2 text-sm break-words whitespace-pre-wrap ${
+                        isOwn
+                          ? "bg-primary text-primary-foreground rounded-tr-sm"
+                          : "bg-secondary text-secondary-foreground rounded-tl-sm"
+                      }`}
+                    >
+                      {msg.body}
+                    </div>
+                    <span className="px-1 text-[10px] text-muted-foreground">
+                      {new Date(msg.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {user ? (
+            <div className="flex items-center gap-2 border-t border-border/60 p-3">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder="Nachricht schreiben..."
+                className="flex-1 rounded-full border border-border/60 bg-background px-4 py-2 text-sm outline-none focus:border-border"
+              />
+              <Button
+                onClick={sendMessage}
+                size="icon"
+                className="rounded-full shrink-0"
+                disabled={!newMessage.trim()}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 border-t border-border/60 p-4 text-center">
+              <p className="text-sm text-muted-foreground">Melde dich an um zu chatten</p>
+              <Button asChild size="sm" className="rounded-full">
+                <Link to="/login">Anmelden</Link>
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
 
       <h2 className="mt-10 mb-4 text-lg font-semibold">Beiträge</h2>
       {posts.length === 0 ? (
