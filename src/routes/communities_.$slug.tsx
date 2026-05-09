@@ -331,13 +331,78 @@ function CommunityDetail() {
         </div>
         <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{community.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{community.name}</h1>
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                  <Shield className="h-3 w-3" /> Admin
+                </span>
+              )}
+            </div>
             {community.description && <p className="mt-1 text-sm text-muted-foreground">{community.description}</p>}
             <p className="mt-2 text-xs text-muted-foreground">{memberCount.toLocaleString("de-DE")} Mitglieder</p>
           </div>
-          <Button onClick={toggleJoin} variant={isMember ? "secondary" : "default"} className="rounded-full">
-            {isMember ? "Mitglied" : "Beitreten"}
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <>
+                <Dialog open={membersOpen} onOpenChange={(o) => { setMembersOpen(o); if (o) loadMembers(); }}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full">
+                      <Users className="h-4 w-4" /> Mitglieder
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Mitglieder verwalten</DialogTitle></DialogHeader>
+                    <ul className="max-h-80 space-y-2 overflow-y-auto">
+                      {members.map((m) => (
+                        <li key={m.user_id} className="flex items-center gap-3 rounded-lg border border-border/60 p-2">
+                          <Avatar className="h-8 w-8">
+                            {m.profiles?.avatar_url && <AvatarImage src={m.profiles.avatar_url} alt={m.profiles.username} />}
+                            <AvatarFallback className="text-xs">{m.profiles?.username?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">@{m.profiles?.username ?? "user"}</p>
+                            <p className="text-xs text-muted-foreground">{m.role}</p>
+                          </div>
+                          {m.user_id !== user?.id && (
+                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => kickMember(m.user_id)}>
+                              <UserMinus className="h-4 w-4" /> Kicken
+                            </Button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={editOpen} onOpenChange={(o) => { setEditOpen(o); if (o) { setEditName(community.name); setEditCoverFile(null); } }}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full">
+                      <Pencil className="h-4 w-4" /> Bearbeiten
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Community bearbeiten</DialogTitle></DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="cname">Name</Label>
+                        <Input id="cname" value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={60} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="ccover">Cover-Bild (Thumbnail)</Label>
+                        <Input id="ccover" type="file" accept="image/*" onChange={(e) => setEditCoverFile(e.target.files?.[0] ?? null)} />
+                      </div>
+                      <Button onClick={saveMeta} disabled={savingMeta} className="w-full rounded-full">
+                        {savingMeta ? <Loader2 className="h-4 w-4 animate-spin" /> : "Speichern"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
+            )}
+            <Button onClick={toggleJoin} variant={isMember ? "secondary" : "default"} className="rounded-full">
+              {isMember ? "Mitglied" : "Beitreten"}
+            </Button>
+          </div>
         </div>
       </div>
 
