@@ -15,8 +15,6 @@ import {
 } from "@/components/ui/select";
 import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
-import { toUserMessage } from "@/lib/errors";
-import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/post/new")({
   component: NewPostPage,
@@ -32,6 +30,7 @@ function NewPostPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user && !authLoading) navigate({ to: "/login" });
@@ -54,18 +53,30 @@ function NewPostPage() {
   const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    const err = validateImageFile(file);
-    if (err) {
+    if (file.size > 10 * 1024 * 1024) {
       e.target.value = "";
-      return toast.error(err);
+      return toast.error("Bild darf maximal 10MB groß sein.");
+    }
+    const fileExt = file.name.split(".").pop()?.toLowerCase();
+    const allowedTypes = ["jpg", "jpeg", "png", "webp", "gif"];
+    if (!fileExt || !allowedTypes.includes(fileExt)) {
+      e.target.value = "";
+      return toast.error("Nur JPG, PNG, WEBP oder GIF erlaubt.");
     }
     setPreview(URL.createObjectURL(file));
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("posts").upload(path, file);
-    if (error) return toast.error(toUserMessage(error, "Bild konnte nicht hochgeladen werden."));
-    const { data } = supabase.storage.from("posts").getPublicUrl(path);
+    setUploading(true);
+    const filePath = `posts/${user.id}/${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("post-images")
+      .upload(filePath, file, { upsert: true, contentType: file.type });
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      setUploading(false);
+      return toast.error("Bild konnte nicht hochgeladen werden: " + uploadError.message);
+    }
+    const { data } = supabase.storage.from("post-images").getPublicUrl(filePath);
     setImageUrl(data.publicUrl);
+    setUploading(false);
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -80,7 +91,7 @@ function NewPostPage() {
       community_id: community === "none" ? null : community,
     });
     setSaving(false);
-    if (error) return toast.error(toUserMessage(error, "Beitrag konnte nicht erstellt werden."));
+    if (error) return toast.error("Beitrag konnte nicht erstellt werden: " + error.message);
     toast.success("Beitrag veröffentlicht");
     navigate({ to: "/", replace: false });
   };
@@ -121,8 +132,8 @@ function NewPostPage() {
             </SelectContent>
           </Select>
         </div>
-        <Button type="submit" className="w-full rounded-full" disabled={saving}>
-          {saving ? "Veröffentliche…" : "Veröffentlichen"}
+        <Button type="submit" className="w-full rounded-full" disabled={saving || uploading}>
+          {uploading ? "Bild wird hochgeladen..." : saving ? "Veröffentliche…" : "Veröffentlichen"}
         </Button>
       </form>
     </main>
