@@ -189,21 +189,21 @@ function CommunityDetail() {
   };
 
   const saveMeta = async () => {
-    if (!community || !isAdmin) return;
+    if (!community || !isAdmin || !user) return;
     setSavingMeta(true);
     let cover_url = community.cover_url;
     if (editCoverFile) {
       const ext = editCoverFile.name.split(".").pop() || "jpg";
-      const path = `covers/${community.id}/${Date.now()}.${ext}`;
+      const path = `${user.id}/covers/${community.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
-        .from("community-covers")
+        .from("community-images")
         .upload(path, editCoverFile, { contentType: editCoverFile.type, upsert: true });
       if (upErr) {
-        console.error("Cover upload error:", upErr.message);
+        console.error("UPLOAD ERROR (community-images cover):", JSON.stringify(upErr));
         setSavingMeta(false);
-        return toast.error("Bild konnte nicht hochgeladen werden: " + upErr.message);
+        return toast.error("Upload fehlgeschlagen: " + upErr.message);
       }
-      const { data: pub } = supabase.storage.from("community-covers").getPublicUrl(path);
+      const { data: pub } = supabase.storage.from("community-images").getPublicUrl(path);
       cover_url = pub.publicUrl;
     }
     const { error } = await supabase
