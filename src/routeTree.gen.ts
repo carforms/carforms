@@ -18,7 +18,7 @@ import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
 import { Route as PostNewRouteImport } from './routes/post.new'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
-import { Route as CommunitiesSlugRouteImport } from './routes/communities.$slug'
+import { Route as CommunitiesSlugRouteImport } from './routes/communities_.$slug'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -69,9 +69,9 @@ const PostPostIdRoute = PostPostIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesSlugRoute = CommunitiesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => CommunitiesRoute,
+  id: '/communities_/$slug',
+  path: '/communities/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
@@ -92,7 +92,7 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/communities': typeof CommunitiesRouteWithChildren
+  '/communities': typeof CommunitiesRoute
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
@@ -107,7 +107,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/communities': typeof CommunitiesRouteWithChildren
+  '/communities': typeof CommunitiesRoute
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
@@ -123,11 +123,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/communities': typeof CommunitiesRouteWithChildren
+  '/communities': typeof CommunitiesRoute
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
-  '/communities/$slug': typeof CommunitiesSlugRoute
+  '/communities_/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
@@ -174,7 +174,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/search'
     | '/signup'
-    | '/communities/$slug'
+    | '/communities_/$slug'
     | '/post/$postId'
     | '/post/new'
     | '/profile/$username'
@@ -186,10 +186,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CommunitiesRoute: typeof CommunitiesRouteWithChildren
+  CommunitiesRoute: typeof CommunitiesRoute
   LoginRoute: typeof LoginRoute
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
+  CommunitiesSlugRoute: typeof CommunitiesSlugRoute
   PostPostIdRoute: typeof PostPostIdRoute
   PostNewRoute: typeof PostNewRoute
   ProfileUsernameRoute: typeof ProfileUsernameRoute
@@ -264,12 +265,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/communities/$slug': {
-      id: '/communities/$slug'
-      path: '/$slug'
+    '/communities_/$slug': {
+      id: '/communities_/$slug'
+      path: '/communities/$slug'
       fullPath: '/communities/$slug'
       preLoaderRoute: typeof CommunitiesSlugRouteImport
-      parentRoute: typeof CommunitiesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -295,24 +296,13 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface CommunitiesRouteChildren {
-  CommunitiesSlugRoute: typeof CommunitiesSlugRoute
-}
-
-const CommunitiesRouteChildren: CommunitiesRouteChildren = {
-  CommunitiesSlugRoute: CommunitiesSlugRoute,
-}
-
-const CommunitiesRouteWithChildren = CommunitiesRoute._addFileChildren(
-  CommunitiesRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CommunitiesRoute: CommunitiesRouteWithChildren,
+  CommunitiesRoute: CommunitiesRoute,
   LoginRoute: LoginRoute,
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
+  CommunitiesSlugRoute: CommunitiesSlugRoute,
   PostPostIdRoute: PostPostIdRoute,
   PostNewRoute: PostNewRoute,
   ProfileUsernameRoute: ProfileUsernameRoute,
@@ -324,12 +314,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
