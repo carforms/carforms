@@ -510,9 +510,21 @@ function CommunityDetail() {
                         {msg.body}
                       </div>
                     )}
-                    <span className="px-1 text-[10px] text-muted-foreground">
-                      {new Date(msg.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                    <div className="flex items-center gap-2 px-1">
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(msg.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      {(isOwn || isAdmin) && (
+                        <button
+                          type="button"
+                          onClick={() => deleteMessage(msg.id)}
+                          className="text-muted-foreground hover:text-destructive"
+                          aria-label="Nachricht löschen"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
