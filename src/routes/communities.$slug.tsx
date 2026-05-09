@@ -118,7 +118,7 @@ function CommunityDetail() {
     if (!community) return;
     const { data } = await supabase
       .from("community_messages")
-      .select("id,body,created_at,user_id")
+      .select("id,body,created_at,user_id,attachment_url,attachment_type,attachment_name,attachment_size")
       .eq("community_id", community.id)
       .order("created_at", { ascending: true })
       .limit(100);
