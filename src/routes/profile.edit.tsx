@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
+import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/profile/edit")({
   component: EditProfilePage,
@@ -41,13 +42,15 @@ function EditProfilePage() {
   const handleAvatarUpload = async (file: File) => {
     if (!user) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Bild darf maximal 5MB groß sein.");
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
     setUploading(true);
-    const fileExt = file.name.split(".").pop();
+    const mimeExt = file.type.split("/")[1]?.toLowerCase() ?? "jpg";
+    const fileExt = mimeExt === "jpeg" ? "jpg" : mimeExt;
     const filePath = `${user.id}/avatar.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
