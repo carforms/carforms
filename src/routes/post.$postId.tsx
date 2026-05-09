@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, ArrowLeft, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, ArrowLeft, Trash2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -25,6 +25,7 @@ type PostDetail = {
 type Comment = {
   id: string;
   body: string;
+  image_url: string | null;
   created_at: string;
   user_id: string;
   profiles: { username: string; display_name: string | null; avatar_url: string | null } | null;
@@ -39,6 +40,9 @@ function PostDetailPage() {
   const [likes, setLikes] = useState<{ user_id: string }[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [comment, setComment] = useState("");
+  const [commentImage, setCommentImage] = useState<File | null>(null);
+  const [commentImagePreview, setCommentImagePreview] = useState<string | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function load() {
@@ -58,7 +62,7 @@ function PostDetailPage() {
       supabase.from("post_likes").select("user_id").eq("post_id", postData.id),
       supabase
         .from("post_comments")
-        .select("id,body,created_at,user_id")
+        .select("id,body,image_url,created_at,user_id")
         .eq("post_id", postData.id)
         .order("created_at", { ascending: true }),
     ]);
@@ -114,16 +118,31 @@ function PostDetailPage() {
       navigate({ to: "/login" });
       return;
     }
-    if (!comment.trim()) return;
+    if (!comment.trim() && !commentImage) return;
     setBusy(true);
+    let imageUrl: string | null = null;
+    if (commentImage) {
+      const ext = commentImage.name.split(".").pop() ?? "jpg";
+      const path = `comments/${postId}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("post-images").upload(path, commentImage);
+      if (upErr) {
+        setBusy(false);
+        toast.error(toUserMessage(upErr));
+        return;
+      }
+      imageUrl = supabase.storage.from("post-images").getPublicUrl(path).data.publicUrl;
+    }
     const { error } = await supabase
       .from("post_comments")
-      .insert({ post_id: postId, user_id: user.id, body: comment.trim() });
+      .insert({ post_id: postId, user_id: user.id, body: comment.trim(), image_url: imageUrl });
     setBusy(false);
     if (error) {
       toast.error(toUserMessage(error));
     } else {
       setComment("");
+      if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
+      setCommentImage(null);
+      setCommentImagePreview(null);
       load();
     }
   }
