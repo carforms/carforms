@@ -350,28 +350,74 @@ function CommunityDetail() {
           </div>
 
           {user ? (
-            <div className="flex items-center gap-2 border-t border-border/60 p-3">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-                placeholder="Nachricht schreiben..."
-                className="flex-1 rounded-full border border-border/60 bg-background px-4 py-2 text-sm outline-none focus:border-border"
-              />
-              <Button
-                onClick={sendMessage}
-                size="icon"
-                className="rounded-full shrink-0"
-                disabled={!newMessage.trim()}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+            <div className="border-t border-border/60 p-3">
+              {pendingFile && (
+                <div className="mb-2 flex items-center gap-3 rounded-xl border border-border/60 bg-secondary/40 p-2">
+                  {pendingPreview ? (
+                    <img src={pendingPreview} alt={pendingFile.name} className="h-12 w-12 rounded-lg object-cover" />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-background">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium">{pendingFile.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{formatBytes(pendingFile.size)}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={clearPending}
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 shrink-0 rounded-full"
+                    disabled={uploading}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept="image/*,application/pdf,.doc,.docx,.txt,.zip"
+                  onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+                />
+                <Button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full shrink-0"
+                  disabled={uploading}
+                  aria-label="Datei anhängen"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  placeholder="Nachricht schreiben..."
+                  className="flex-1 rounded-full border border-border/60 bg-background px-4 py-2 text-sm outline-none focus:border-border"
+                  disabled={uploading}
+                />
+                <Button
+                  onClick={sendMessage}
+                  size="icon"
+                  className="rounded-full shrink-0"
+                  disabled={uploading || (!newMessage.trim() && !pendingFile)}
+                >
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 border-t border-border/60 p-4 text-center">
