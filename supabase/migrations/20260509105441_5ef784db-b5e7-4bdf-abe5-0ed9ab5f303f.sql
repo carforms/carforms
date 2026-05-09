@@ -1,0 +1,3 @@
+DELETE FROM post_likes WHERE post_id IN ('76abe725-e1d5-4472-883f-d971d36d60d9','03562e2d-5975-414a-a54a-ef8076ffe2d8');
+DELETE FROM post_comments WHERE post_id IN ('76abe725-e1d5-4472-883f-d971d36d60d9','03562e2d-5975-414a-a54a-ef8076ffe2d8');
+DELETE FROM posts WHERE id IN ('76abe725-e1d5-4472-883f-d971d36d60d9','03562e2d-5975-414a-a54a-ef8076ffe2d8');
