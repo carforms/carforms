@@ -91,7 +91,7 @@ function NewPostPage() {
       community_id: community === "none" ? null : community,
     });
     setSaving(false);
-    if (error) return toast.error(toUserMessage(error, "Beitrag konnte nicht erstellt werden."));
+    if (error) return toast.error("Beitrag konnte nicht erstellt werden: " + error.message);
     toast.success("Beitrag veröffentlicht");
     navigate({ to: "/", replace: false });
   };
