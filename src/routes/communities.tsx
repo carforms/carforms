@@ -79,7 +79,7 @@ function CommunitiesPage() {
 
   const toggleJoin = async (c: Community) => {
     if (!user) return navigate({ to: "/login" });
-    const isMember = c.community_members.some((m) => m.user_id === user.id);
+    const isMember = c.is_member;
     if (isMember) {
       const { error } = await supabase.from("community_members").delete().eq("community_id", c.id).eq("user_id", user.id);
       if (error) return toast.error(toUserMessage(error));
