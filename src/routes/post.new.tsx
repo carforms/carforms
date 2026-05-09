@@ -52,31 +52,69 @@ function NewPostPage() {
 
   const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
+    if (!user) {
+      e.target.value = "";
+      return toast.error("Du musst angemeldet sein, um Bilder hochzuladen.");
+    }
     if (file.size > 10 * 1024 * 1024) {
       e.target.value = "";
       return toast.error("Bild darf maximal 10MB groß sein.");
     }
-    const fileExt = file.name.split(".").pop()?.toLowerCase();
     const allowedTypes = ["jpg", "jpeg", "png", "webp", "gif"];
-    if (!fileExt || !allowedTypes.includes(fileExt)) {
+    const rawExt = file.name.includes(".") ? file.name.split(".").pop()?.toLowerCase() : undefined;
+    const mimeExt = file.type?.split("/")[1]?.toLowerCase();
+    const fileExt = rawExt && allowedTypes.includes(rawExt) ? rawExt : mimeExt;
+    if (!fileExt) {
       e.target.value = "";
-      return toast.error("Nur JPG, PNG, WEBP oder GIF erlaubt.");
+      return toast.error("Dateityp konnte nicht erkannt werden. Bitte JPG, PNG, WEBP oder GIF wählen.");
+    }
+    if (!allowedTypes.includes(fileExt)) {
+      e.target.value = "";
+      return toast.error(`Dateityp "${fileExt}" wird nicht unterstützt. Erlaubt: JPG, PNG, WEBP, GIF.`);
     }
     setPreview(URL.createObjectURL(file));
     setUploading(true);
     const filePath = `posts/${user.id}/${Date.now()}.${fileExt}`;
-    const { error: uploadError } = await supabase.storage
-      .from("post-images")
-      .upload(filePath, file, { upsert: true, contentType: file.type });
-    if (uploadError) {
-      console.error("Upload error:", uploadError);
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from("post-images")
+        .upload(filePath, file, { upsert: true, contentType: file.type || `image/${fileExt}` });
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        const msg = uploadError.message?.toLowerCase() ?? "";
+        if (msg.includes("row-level security") || msg.includes("unauthorized") || msg.includes("permission")) {
+          toast.error("Keine Berechtigung zum Hochladen. Bitte erneut anmelden und nochmal versuchen.");
+        } else if (msg.includes("bucket") && msg.includes("not found")) {
+          toast.error("Speicher-Bucket „post-images“ existiert nicht. Bitte Admin kontaktieren.");
+        } else if (msg.includes("payload") || msg.includes("size") || msg.includes("too large")) {
+          toast.error("Datei ist zu groß für den Upload.");
+        } else if (msg.includes("mime") || msg.includes("content type")) {
+          toast.error("Dateityp wird vom Speicher abgelehnt.");
+        } else if (msg.includes("network") || msg.includes("fetch")) {
+          toast.error("Netzwerkfehler beim Upload. Bitte Verbindung prüfen.");
+        } else {
+          toast.error("Bild konnte nicht hochgeladen werden: " + uploadError.message);
+        }
+        setUploading(false);
+        setPreview(null);
+        return;
+      }
+      const { data } = supabase.storage.from("post-images").getPublicUrl(filePath);
+      if (!data?.publicUrl) {
+        toast.error("Öffentliche URL konnte nicht erzeugt werden.");
+        setUploading(false);
+        return;
+      }
+      setImageUrl(data.publicUrl);
+    } catch (err) {
+      console.error("Unexpected upload error:", err);
+      const message = err instanceof Error ? err.message : "Unbekannter Fehler";
+      toast.error("Unerwarteter Fehler beim Upload: " + message);
+      setPreview(null);
+    } finally {
       setUploading(false);
-      return toast.error("Bild konnte nicht hochgeladen werden: " + uploadError.message);
     }
-    const { data } = supabase.storage.from("post-images").getPublicUrl(filePath);
-    setImageUrl(data.publicUrl);
-    setUploading(false);
   };
 
   const submit = async (e: React.FormEvent) => {
