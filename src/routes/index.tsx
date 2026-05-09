@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, MessageCircle, RefreshCw } from "lucide-react";
+import { Heart, MessageCircle, RefreshCw, Trophy } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -145,15 +145,72 @@ function FeedPage() {
       </div>
 
       {!user && (
-        <div className="mb-6 flex flex-col items-start gap-3 rounded-2xl border border-border/60 bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-medium">Willkommen bei carforms</p>
-            <p className="text-xs text-muted-foreground">Tritt Communities bei und teile deine Beiträge.</p>
+        <>
+          <section className="relative mb-12 overflow-hidden rounded-3xl border border-border/60 bg-card">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 opacity-80" />
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col items-center gap-6 px-6 py-16 text-center">
+              {/* Badge */}
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-widest text-white/60 uppercase">
+                Die Community für Autokultur
+              </span>
+
+              {/* Headline */}
+              <h1 className="max-w-lg text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+                Design & Ästhetik,<br />die bewegen.
+              </h1>
+
+              {/* Subline */}
+              <p className="max-w-md text-base text-white/50 leading-relaxed">
+                Carforms ist der Ort für alle die Autos nicht nur fahren — sondern verstehen.
+                Teile deine Builds, diskutiere Designs und werde Teil der Szene.
+              </p>
+
+              {/* CTAs */}
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button size="lg" className="rounded-full px-8 font-semibold" asChild>
+                  <Link to="/signup">Kostenlos registrieren</Link>
+                </Button>
+                <Button size="lg" variant="outline" className="rounded-full px-8 border-white/10 text-white/70 hover:text-white" asChild>
+                  <Link to="/login">Anmelden</Link>
+                </Button>
+              </div>
+
+              {/* Stats row */}
+              <div className="mt-4 flex gap-8 text-center">
+                <div>
+                  <p className="text-2xl font-bold text-white">JDM</p>
+                  <p className="text-xs text-white/40">Kultur</p>
+                </div>
+                <div className="w-px bg-white/10" />
+                <div>
+                  <p className="text-2xl font-bold text-white">Stance</p>
+                  <p className="text-xs text-white/40">Ästhetik</p>
+                </div>
+                <div className="w-px bg-white/10" />
+                <div>
+                  <p className="text-2xl font-bold text-white">Drift</p>
+                  <p className="text-xs text-white/40">& Track</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="mb-8 flex items-center justify-between rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3">
+            <div className="flex items-center gap-3">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              <div>
+                <p className="text-sm font-semibold text-yellow-500">Car of the Week</p>
+                <p className="text-xs text-muted-foreground">Stimme jetzt ab — welcher Build verdient die Krone?</p>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" className="rounded-full border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10" asChild>
+              <Link to="/communities">Abstimmen</Link>
+            </Button>
           </div>
-          <Button size="sm" className="rounded-full" asChild>
-            <Link to="/signup">Kostenlos starten</Link>
-          </Button>
-        </div>
+        </>
       )}
 
       {loading ? (
