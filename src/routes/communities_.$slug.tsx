@@ -7,7 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileText, Loader2, MessageCircle, Paperclip, Pencil, Send, Shield, Trash2, UserMinus, Users, X } from "lucide-react";
+import { FileText, ImagePlus, Loader2, MessageCircle, Paperclip, Pencil, Send, Shield, Trash2, UserMinus, Users, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
