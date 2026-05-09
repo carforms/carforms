@@ -694,6 +694,61 @@ function CommunityDetail() {
       )}
 
       <h2 className="mt-10 mb-4 text-lg font-semibold">Beiträge</h2>
+
+      {isMember && user && (
+        <div className="mb-6 space-y-3 rounded-2xl border border-border/60 bg-card p-4">
+          <Input
+            value={newPostTitle}
+            onChange={(e) => setNewPostTitle(e.target.value)}
+            placeholder="Titel des Beitrags"
+            maxLength={120}
+          />
+          <Textarea
+            value={newPostBody}
+            onChange={(e) => setNewPostBody(e.target.value)}
+            placeholder="Was möchtest du teilen?"
+            rows={3}
+          />
+          <div className="flex items-center gap-3">
+            <label className="flex cursor-pointer items-center gap-2 rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent transition-colors">
+              <ImagePlus className="h-4 w-4" />
+              Bild hinzufügen
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+            </label>
+            {postImagePreview && (
+              <div className="relative">
+                <img src={postImagePreview} alt="Vorschau" className="h-16 w-16 rounded-xl object-cover" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (postImagePreview) URL.revokeObjectURL(postImagePreview);
+                    setPostImage(null);
+                    setPostImagePreview(null);
+                  }}
+                  className="absolute -right-2 -top-2 rounded-full bg-destructive p-0.5 text-white"
+                  aria-label="Bild entfernen"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            <Button
+              onClick={handleSubmitPost}
+              disabled={!newPostTitle.trim() || uploadingImage || submittingPost}
+              className="ml-auto rounded-full"
+              size="sm"
+            >
+              {uploadingImage ? "Wird hochgeladen..." : submittingPost ? "Wird gepostet..." : "Posten"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {posts.length === 0 ? (
         <p className="text-sm text-muted-foreground">Noch keine Beiträge in dieser Community.</p>
       ) : (
