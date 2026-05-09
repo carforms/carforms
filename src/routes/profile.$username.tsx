@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MapPin, Settings, Share2, UserPlus, UserCheck, X, Loader2 } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
@@ -19,6 +20,7 @@ type Profile = {
   bio: string | null;
   location: string | null;
   avatar_url: string | null;
+  verified: boolean;
 };
 
 type Post = { id: string; image_url: string | null; title: string | null };
@@ -98,7 +100,7 @@ function ProfilePage() {
     (async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("id,username,display_name,bio,location,avatar_url")
+        .select("id,username,display_name,bio,location,avatar_url,verified")
         .eq("username", username)
         .maybeSingle();
       if (!p) {
@@ -209,7 +211,10 @@ function ProfilePage() {
 
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold">{profile.display_name || profile.username}</h1>
+            <h1 className="flex items-center gap-1.5 text-2xl font-bold">
+              {profile.display_name || profile.username}
+              {profile.verified && <VerifiedBadge className="h-5 w-5" />}
+            </h1>
             {isMe ? (
               <>
                 <Button size="sm" variant="secondary" className="rounded-full" onClick={() => navigate({ to: "/profile/edit" })}>
