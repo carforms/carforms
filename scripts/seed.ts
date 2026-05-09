@@ -64,25 +64,44 @@ function randomCreatedAt(): string {
 }
 
 async function main() {
-  console.log("Inserting profiles…");
+  console.log("Creating auth users…");
+  // profiles.id has a FK to auth.users.id. Create auth users first; the
+  // handle_new_user trigger seeds a profile row, which we then update.
+  const profileIds: string[] = [];
+  for (const p of profiles) {
+    const email = `${p.username}@demo.carforms.de`;
+    const { data: created, error: authErr } = await supabase.auth.admin.createUser({
+      email,
+      password: crypto.randomUUID(),
+      email_confirm: true,
+      user_metadata: {
+        username: p.username,
+        display_name: p.display_name,
+      },
+    });
+    if (authErr || !created.user) {
+      console.error(`Auth create failed for ${p.username}:`, authErr);
+      process.exit(1);
+    }
+    const uid = created.user.id;
+    profileIds.push(uid);
 
-  // Profiles.id normally mirrors auth.users.id. We mint random UUIDs for demo data.
-  const profileRows = profiles.map((p) => ({
-    id: crypto.randomUUID(),
-    ...p,
-    avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.username}`,
-  }));
-
-  const { data: insertedProfiles, error: profileError } = await supabase
-    .from("profiles")
-    .insert(profileRows)
-    .select("id");
-
-  if (profileError) {
-    console.error("Profile insert failed:", profileError);
-    process.exit(1);
+    const { error: updErr } = await supabase
+      .from("profiles")
+      .update({
+        username: p.username,
+        display_name: p.display_name,
+        bio: p.bio,
+        location: p.location,
+        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.username}`,
+      })
+      .eq("id", uid);
+    if (updErr) {
+      console.error(`Profile update failed for ${p.username}:`, updErr);
+      process.exit(1);
+    }
   }
-  console.log(`Inserted ${insertedProfiles?.length ?? 0} profiles.`);
+  console.log(`Created ${profileIds.length} auth users + profiles.`);
 
   console.log("Inserting posts…");
   const profileIds = profileRows.map((p) => p.id);
