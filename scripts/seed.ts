@@ -111,6 +111,7 @@ async function main() {
     author_id: profileIds[Math.floor(Math.random() * profileIds.length)],
     title: post.title,
     body: post.body,
+    image_url: post.image_url,
     created_at: randomCreatedAt(),
   }));
 
