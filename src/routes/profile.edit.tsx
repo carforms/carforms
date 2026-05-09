@@ -55,11 +55,11 @@ function EditProfilePage() {
 
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(filePath, file, { upsert: true });
+      .upload(filePath, file, { upsert: true, contentType: file.type });
 
     if (uploadError) {
-      console.error("Upload error:", uploadError);
-      toast.error(toUserMessage(uploadError, "Bild konnte nicht hochgeladen werden."));
+      console.error("UPLOAD ERROR (avatars):", JSON.stringify(uploadError));
+      toast.error("Upload fehlgeschlagen: " + uploadError.message);
       setUploading(false);
       return;
     }

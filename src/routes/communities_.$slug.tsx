@@ -122,13 +122,14 @@ function CommunityDetail() {
     if (!postImage || !user) return null;
     setUploadingImage(true);
     const fileExt = postImage.name.split(".").pop()?.toLowerCase() || "jpg";
-    const filePath = `community-posts/${user.id}/${Date.now()}.${fileExt}`;
+    const filePath = `${user.id}/community-posts/${Date.now()}.${fileExt}`;
     const { error } = await supabase.storage
       .from("community-images")
       .upload(filePath, postImage, { upsert: true, contentType: postImage.type });
     setUploadingImage(false);
     if (error) {
-      toast.error("Bild konnte nicht hochgeladen werden: " + error.message);
+      console.error("UPLOAD ERROR (community-images):", JSON.stringify(error));
+      toast.error("Upload fehlgeschlagen: " + error.message);
       return null;
     }
     const { data } = supabase.storage.from("community-images").getPublicUrl(filePath);
@@ -188,21 +189,21 @@ function CommunityDetail() {
   };
 
   const saveMeta = async () => {
-    if (!community || !isAdmin) return;
+    if (!community || !isAdmin || !user) return;
     setSavingMeta(true);
     let cover_url = community.cover_url;
     if (editCoverFile) {
       const ext = editCoverFile.name.split(".").pop() || "jpg";
-      const path = `covers/${community.id}/${Date.now()}.${ext}`;
+      const path = `${user.id}/covers/${community.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
-        .from("community-covers")
+        .from("community-images")
         .upload(path, editCoverFile, { contentType: editCoverFile.type, upsert: true });
       if (upErr) {
-        console.error("Cover upload error:", upErr.message);
+        console.error("UPLOAD ERROR (community-images cover):", JSON.stringify(upErr));
         setSavingMeta(false);
-        return toast.error("Bild konnte nicht hochgeladen werden: " + upErr.message);
+        return toast.error("Upload fehlgeschlagen: " + upErr.message);
       }
-      const { data: pub } = supabase.storage.from("community-covers").getPublicUrl(path);
+      const { data: pub } = supabase.storage.from("community-images").getPublicUrl(path);
       cover_url = pub.publicUrl;
     }
     const { error } = await supabase
