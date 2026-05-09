@@ -445,7 +445,8 @@ function CommunityDetail() {
               </Button>
             </div>
           )}
-        </section>
+          </section>
+        </>
       )}
 
       <h2 className="mt-10 mb-4 text-lg font-semibold">Beiträge</h2>
