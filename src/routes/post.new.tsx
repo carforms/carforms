@@ -51,6 +51,43 @@ function NewPostPage() {
       });
   }, [user]);
 
+  const handleImageUpload = async (file: File): Promise<string | null> => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      toast.error("Nicht eingeloggt.");
+      return null;
+    }
+
+    const fileExt = file.name.split(".").pop()?.toLowerCase();
+    const filePath = `posts/${session.user.id}/${Date.now()}.${fileExt}`;
+    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+    const SUPABASE_ANON_KEY =
+      import.meta.env.VITE_SUPABASE_ANON_KEY ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/post-images/${filePath}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: SUPABASE_ANON_KEY,
+        "Content-Type": file.type,
+        "x-upsert": "true",
+      },
+      body: file,
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Upload failed:", err);
+      toast.error("Upload fehlgeschlagen: " + err);
+      return null;
+    }
+
+    return `${SUPABASE_URL}/storage/v1/object/public/post-images/${filePath}`;
+  };
+
   const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -62,64 +99,12 @@ function NewPostPage() {
     setPreview(URL.createObjectURL(file));
     setUploading(true);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        toast.error("Bitte melde dich erneut an.");
+      const uploadedUrl = await handleImageUpload(file);
+      if (!uploadedUrl) {
         setPreview(null);
         return;
       }
-
-      const mimeExt = file.type.split("/")[1]?.toLowerCase() ?? "jpg";
-      const fileNameExt = file.name.split(".").pop()?.toLowerCase();
-      const fileExt = fileNameExt || (mimeExt === "jpeg" ? "jpg" : mimeExt);
-      const filePath = `${session.user.id}/posts/${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("post-images")
-        .upload(filePath, file, {
-          upsert: true,
-          contentType: file.type || `image/${fileExt}`,
-          duplex: "half",
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-      if (uploadError) {
-        console.error("UPLOAD ERROR (post-images):", JSON.stringify(uploadError));
-        const msg = uploadError.message?.toLowerCase() ?? "";
-        if (
-          msg.includes("row-level security") ||
-          msg.includes("unauthorized") ||
-          msg.includes("permission")
-        ) {
-          toast.error(
-            "Keine Berechtigung zum Hochladen. Bitte erneut anmelden und nochmal versuchen.",
-          );
-        } else if (msg.includes("bucket") && msg.includes("not found")) {
-          toast.error("Speicher-Bucket „post-images“ existiert nicht. Bitte Admin kontaktieren.");
-        } else if (msg.includes("payload") || msg.includes("size") || msg.includes("too large")) {
-          toast.error("Datei ist zu groß für den Upload.");
-        } else if (msg.includes("mime") || msg.includes("content type")) {
-          toast.error("Dateityp wird vom Speicher abgelehnt.");
-        } else if (msg.includes("network") || msg.includes("fetch")) {
-          toast.error("Netzwerkfehler beim Upload. Bitte Verbindung prüfen.");
-        } else {
-          toast.error("Bild konnte nicht hochgeladen werden: " + uploadError.message);
-        }
-        setUploading(false);
-        setPreview(null);
-        return;
-      }
-      const { data } = supabase.storage.from("post-images").getPublicUrl(filePath);
-      if (!data?.publicUrl) {
-        toast.error("Öffentliche URL konnte nicht erzeugt werden.");
-        setUploading(false);
-        return;
-      }
-      setImageUrl(data.publicUrl);
+      setImageUrl(uploadedUrl);
     } catch (err) {
       console.error("Unexpected upload error:", err);
       const message = err instanceof Error ? err.message : "Unbekannter Fehler";
