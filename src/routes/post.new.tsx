@@ -16,9 +16,7 @@ import {
 import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { validateImageFile } from "@/lib/upload-validation";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export const Route = createFileRoute("/post/new")({
   component: NewPostPage,
@@ -55,51 +53,7 @@ function NewPostPage() {
   }, [user]);
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.refreshSession();
-
-    let activeSession = session;
-    if (sessionError || !session) {
-      const {
-        data: { session: existingSession },
-      } = await supabase.auth.getSession();
-      activeSession = existingSession;
-    }
-
-    if (!activeSession) {
-      toast.error("Bitte melde dich erneut an.");
-      return null;
-    }
-
-    const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const filePath = `${activeSession.user.id}/posts/${fileName}`;
-    const objectPath = `${encodeURIComponent(activeSession.user.id)}/posts/${encodeURIComponent(fileName)}`;
-
-    console.log("Uploading image to user folder:", activeSession.user.id);
-
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/post-images/${objectPath}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${activeSession.access_token}`,
-        apikey: SUPABASE_PUBLISHABLE_KEY,
-        "Content-Type": file.type,
-        "x-upsert": "true",
-      },
-      body: file,
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("Upload error:", err);
-      toast.error("Upload fehlgeschlagen: " + err);
-      return null;
-    }
-
-    const { data } = supabase.storage.from("post-images").getPublicUrl(filePath);
-    return data.publicUrl;
+    return uploadToCloudinary(file);
   };
 
   const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
