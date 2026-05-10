@@ -53,11 +53,16 @@ function NewPostPage() {
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
     // Force refresh the session to get a valid token
-    const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.refreshSession();
 
     let activeSession = session;
     if (sessionError || !session) {
-      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: existingSession },
+      } = await supabase.auth.getSession();
       activeSession = existingSession;
     }
 
