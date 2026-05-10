@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 
-const CLOUD_NAME = "carforms";
+const CLOUD_NAME = "daqvusmpz";
 const UPLOAD_PRESET = "carforms_unsigned";
 
 export async function uploadToCloudinary(file: File): Promise<string | null> {
