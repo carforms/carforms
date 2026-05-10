@@ -66,10 +66,10 @@ function NewPostPage() {
       return null;
     }
 
-    const fileExt = file.name.split(".").pop()?.toLowerCase();
-    const filePath = `posts/${activeSession.user.id}/${Date.now()}.${fileExt}`;
+    const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const filePath = `${activeSession.user.id}/posts/${Date.now()}.${fileExt}`;
 
-    console.log("Uploading with token:", activeSession.access_token.substring(0, 20) + "...");
+    console.log("Uploading image to user folder:", activeSession.user.id);
 
     const { error: uploadError } = await supabase.storage
       .from("post-images")
