@@ -17,6 +17,9 @@ import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { validateImageFile } from "@/lib/upload-validation";
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
 export const Route = createFileRoute("/post/new")({
   component: NewPostPage,
 });
@@ -52,7 +55,6 @@ function NewPostPage() {
   }, [user]);
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
-    // Force refresh the session to get a valid token
     const {
       data: { session },
       error: sessionError,
@@ -72,20 +74,27 @@ function NewPostPage() {
     }
 
     const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const filePath = `${activeSession.user.id}/posts/${Date.now()}.${fileExt}`;
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+    const filePath = `${activeSession.user.id}/posts/${fileName}`;
+    const objectPath = `${encodeURIComponent(activeSession.user.id)}/posts/${encodeURIComponent(fileName)}`;
 
     console.log("Uploading image to user folder:", activeSession.user.id);
 
-    const { error: uploadError } = await supabase.storage
-      .from("post-images")
-      .upload(filePath, file, {
-        upsert: true,
-        contentType: file.type,
-      });
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/post-images/${objectPath}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${activeSession.access_token}`,
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        "Content-Type": file.type,
+        "x-upsert": "true",
+      },
+      body: file,
+    });
 
-    if (uploadError) {
-      console.error("Upload error:", uploadError.message);
-      toast.error("Upload fehlgeschlagen: " + uploadError.message);
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Upload error:", err);
+      toast.error("Upload fehlgeschlagen: " + err);
       return null;
     }
 
