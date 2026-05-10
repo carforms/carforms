@@ -11,6 +11,7 @@ import { FileText, ImagePlus, Loader2, MessageCircle, Paperclip, Pencil, Send, S
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export const Route = createFileRoute("/communities_/$slug")({
   component: CommunityDetail,
@@ -121,19 +122,9 @@ function CommunityDetail() {
   const uploadImage = async (): Promise<string | null> => {
     if (!postImage || !user) return null;
     setUploadingImage(true);
-    const fileExt = postImage.name.split(".").pop()?.toLowerCase() || "jpg";
-    const filePath = `${user.id}/community-posts/${Date.now()}.${fileExt}`;
-    const { error } = await supabase.storage
-      .from("community-images")
-      .upload(filePath, postImage, { upsert: true, contentType: postImage.type });
+    const url = await uploadToCloudinary(postImage);
     setUploadingImage(false);
-    if (error) {
-      console.error("UPLOAD ERROR (community-images):", JSON.stringify(error));
-      toast.error("Upload fehlgeschlagen: " + error.message);
-      return null;
-    }
-    const { data } = supabase.storage.from("community-images").getPublicUrl(filePath);
-    return data.publicUrl;
+    return url;
   };
 
   const handleSubmitPost = async () => {
@@ -193,18 +184,12 @@ function CommunityDetail() {
     setSavingMeta(true);
     let cover_url = community.cover_url;
     if (editCoverFile) {
-      const ext = editCoverFile.name.split(".").pop() || "jpg";
-      const path = `${user.id}/covers/${community.id}/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("community-images")
-        .upload(path, editCoverFile, { contentType: editCoverFile.type, upsert: true });
-      if (upErr) {
-        console.error("UPLOAD ERROR (community-images cover):", JSON.stringify(upErr));
+      const url = await uploadToCloudinary(editCoverFile);
+      if (!url) {
         setSavingMeta(false);
-        return toast.error("Upload fehlgeschlagen: " + upErr.message);
+        return;
       }
-      const { data: pub } = supabase.storage.from("community-images").getPublicUrl(path);
-      cover_url = pub.publicUrl;
+      cover_url = url;
     }
     const { error } = await supabase
       .from("communities")
@@ -365,21 +350,13 @@ function CommunityDetail() {
 
     if (pendingFile) {
       setUploading(true);
-      const ext = pendingFile.name.split(".").pop() || "bin";
-      const path = `${user.id}/${community.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("chat-attachments")
-        .upload(path, pendingFile, { contentType: pendingFile.type, upsert: false });
-      if (upErr) {
-        setUploading(false);
-        return toast.error(toUserMessage(upErr));
-      }
-      const { data: pub } = supabase.storage.from("chat-attachments").getPublicUrl(path);
-      attachment_url = pub.publicUrl;
+      const url = await uploadToCloudinary(pendingFile);
+      setUploading(false);
+      if (!url) return;
+      attachment_url = url;
       attachment_type = pendingFile.type || "application/octet-stream";
       attachment_name = pendingFile.name;
       attachment_size = pendingFile.size;
-      setUploading(false);
     }
 
     const { error } = await supabase.from("community_messages").insert({

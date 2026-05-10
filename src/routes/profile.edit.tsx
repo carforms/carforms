@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 import { validateImageFile } from "@/lib/upload-validation";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export const Route = createFileRoute("/profile/edit")({
   component: EditProfilePage,
@@ -49,23 +50,12 @@ function EditProfilePage() {
     }
 
     setUploading(true);
-    const mimeExt = file.type.split("/")[1]?.toLowerCase() ?? "jpg";
-    const fileExt = mimeExt === "jpeg" ? "jpg" : mimeExt;
-    const filePath = `${user.id}/avatar.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(filePath, file, { upsert: true, contentType: file.type });
-
-    if (uploadError) {
-      console.error("UPLOAD ERROR (avatars):", JSON.stringify(uploadError));
-      toast.error("Upload fehlgeschlagen: " + uploadError.message);
+    const uploaded = await uploadToCloudinary(file);
+    if (!uploaded) {
       setUploading(false);
       return;
     }
-
-    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-    const publicUrl = data.publicUrl + "?t=" + Date.now();
+    const publicUrl = uploaded;
 
     const { error: updateError } = await supabase
       .from("profiles")
