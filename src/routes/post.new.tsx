@@ -52,40 +52,40 @@ function NewPostPage() {
   }, [user]);
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // Force refresh the session to get a valid token
+    const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
 
-    if (!session) {
-      toast.error("Nicht eingeloggt.");
+    let activeSession = session;
+    if (sessionError || !session) {
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      activeSession = existingSession;
+    }
+
+    if (!activeSession) {
+      toast.error("Bitte melde dich erneut an.");
       return null;
     }
 
     const fileExt = file.name.split(".").pop()?.toLowerCase();
-    const filePath = `posts/${session.user.id}/${Date.now()}.${fileExt}`;
-    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-    const SUPABASE_ANON_KEY =
-      import.meta.env.VITE_SUPABASE_ANON_KEY ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const filePath = `posts/${activeSession.user.id}/${Date.now()}.${fileExt}`;
 
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/post-images/${filePath}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-        apikey: SUPABASE_ANON_KEY,
-        "Content-Type": file.type,
-        "x-upsert": "true",
-      },
-      body: file,
-    });
+    console.log("Uploading with token:", activeSession.access_token.substring(0, 20) + "...");
 
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("Upload failed:", err);
-      toast.error("Upload fehlgeschlagen: " + err);
+    const { error: uploadError } = await supabase.storage
+      .from("post-images")
+      .upload(filePath, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError.message);
+      toast.error("Upload fehlgeschlagen: " + uploadError.message);
       return null;
     }
 
-    return `${SUPABASE_URL}/storage/v1/object/public/post-images/${filePath}`;
+    const { data } = supabase.storage.from("post-images").getPublicUrl(filePath);
+    return data.publicUrl;
   };
 
   const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
