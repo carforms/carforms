@@ -296,6 +296,19 @@ function CommunityDetail() {
 
   useEffect(() => {
     if (!chatOpen || !community) return;
+    // Auto-join logged-in users when they open the chat so they can read & write
+    if (user && !isMember) {
+      supabase
+        .from("community_members")
+        .insert({ community_id: community.id, user_id: user.id })
+        .then(({ error }) => {
+          if (!error) {
+            setIsMember(true);
+            setMemberCount((c) => c + 1);
+            loadMessages();
+          }
+        });
+    }
     loadMessages();
     const channel = supabase
       .channel("community-chat-" + community.id)
@@ -464,7 +477,7 @@ function CommunityDetail() {
         </div>
       </div>
 
-      {isMember && (
+      {user && (
         <button
           type="button"
           onClick={() => setChatOpen(!chatOpen)}
@@ -480,7 +493,7 @@ function CommunityDetail() {
         </button>
       )}
 
-      {isMember && chatOpen && (
+      {user && chatOpen && (
         <>
           <div
             className="fixed inset-0 z-40 bg-background/40 backdrop-blur-sm sm:hidden"
