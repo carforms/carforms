@@ -477,7 +477,7 @@ function CommunityDetail() {
         </div>
       </div>
 
-      {isMember && (
+      {user && (
         <button
           type="button"
           onClick={() => setChatOpen(!chatOpen)}
