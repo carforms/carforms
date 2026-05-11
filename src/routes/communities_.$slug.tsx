@@ -493,7 +493,7 @@ function CommunityDetail() {
         </button>
       )}
 
-      {isMember && chatOpen && (
+      {user && chatOpen && (
         <>
           <div
             className="fixed inset-0 z-40 bg-background/40 backdrop-blur-sm sm:hidden"
