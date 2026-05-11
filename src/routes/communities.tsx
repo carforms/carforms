@@ -141,6 +141,14 @@ function CommunitiesPage() {
     load();
   };
 
+  const adminDelete = async (c: Community) => {
+    await supabase.from("community_members").delete().eq("community_id", c.id);
+    const { error } = await supabase.from("communities").delete().eq("id", c.id);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success(`Community "${c.name}" gelöscht.`);
+    load();
+  };
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8 flex items-end justify-between gap-4">
