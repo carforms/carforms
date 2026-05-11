@@ -232,17 +232,51 @@ function CommunitiesPage() {
                     <span className="text-xs text-muted-foreground">
                       {c.member_count.toLocaleString("de-DE")} Mitglieder
                     </span>
-                    <Button
-                      size="sm"
-                      variant={isMember ? "secondary" : "default"}
-                      className="rounded-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleJoin(c);
-                      }}
-                    >
-                      {isMember ? "Mitglied" : "Beitreten"}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                              onClick={(e) => e.stopPropagation()}
+                              title="Community löschen (Admin)"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Community löschen?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                "{c.name}" und alle Mitgliedschaften werden dauerhaft entfernt. Diese Aktion kann nicht rückgängig gemacht werden.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => adminDelete(c)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Löschen
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                      <Button
+                        size="sm"
+                        variant={isMember ? "secondary" : "default"}
+                        className="rounded-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleJoin(c);
+                        }}
+                      >
+                        {isMember ? "Mitglied" : "Beitreten"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </li>
