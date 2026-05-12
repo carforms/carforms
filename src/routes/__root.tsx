@@ -35,13 +35,13 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "carforms – Die deutsche Community für Auto-Enthusiasten. JDM, Stance, Drift & mehr. Teile deinen Build, diskutiere Designs, werde Teil der Szene.",
+          "carforms – Die deutsche Community für Auto-Enthusiasten. JDM, Stance, Drift und mehr. Teile deinen Build, diskutiere Designs, werde Teil der Szene.",
       },
       { property: "og:title", content: "carforms — Die Community für Auto-Enthusiasten" },
-      { property: "og:description", content: "carforms – Die deutsche Community für Auto-Enthusiasten. JDM, Stance, Drift & mehr. Teile deinen Build, diskutiere Designs, werde Teil der Szene." },
+      { property: "og:description", content: "carforms – Die deutsche Community für Auto-Enthusiasten. JDM, Stance, Drift und mehr. Teile deinen Build, diskutiere Designs, werde Teil der Szene." },
       { property: "og:type", content: "website" },
       { name: "twitter:title", content: "carforms — Die Community für Auto-Enthusiasten" },
-      { name: "twitter:description", content: "carforms – Die deutsche Community für Auto-Enthusiasten. JDM, Stance, Drift & mehr. Teile deinen Build, diskutiere Designs, werde Teil der Szene." },
+      { name: "twitter:description", content: "carforms – Die deutsche Community für Auto-Enthusiasten. JDM, Stance, Drift und mehr. Teile deinen Build, diskutiere Designs, werde Teil der Szene." },
       { property: "og:image", content: "https://res.cloudinary.com/daqvusmpz/image/upload/v1778424461/IMG_7822_jghwgg.jpg" },
       { name: "twitter:image", content: "https://res.cloudinary.com/daqvusmpz/image/upload/v1778424461/IMG_7822_jghwgg.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
