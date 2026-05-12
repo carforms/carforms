@@ -21,7 +21,8 @@ type Post = {
   author_id: string;
   profiles: { username: string; display_name: string | null; avatar_url: string | null; verified: boolean } | null;
   post_likes: { user_id: string }[];
-  post_comments: { id: string }[];
+  post_comments: { id: string; body: string; user_id: string; profiles: { username: string; avatar_url: string | null } | null }[];
+  comments_count: number;
 };
 
 function FeedPage() {
@@ -43,16 +44,34 @@ function FeedPage() {
     }
     const enriched = await Promise.all(
       postsData.map(async (post) => {
-        const [{ data: profile }, { data: likes }, { data: comments }] = await Promise.all([
+        const [{ data: profile }, { data: likes }, { data: comments }, { count: commentsCount }] = await Promise.all([
           supabase.from("profiles").select("username,display_name,avatar_url,verified").eq("id", post.author_id).single(),
           supabase.from("post_likes").select("user_id").eq("post_id", post.id),
-          supabase.from("post_comments").select("id").eq("post_id", post.id),
+          supabase
+            .from("post_comments")
+            .select("id, body, user_id")
+            .eq("post_id", post.id)
+            .order("created_at", { ascending: true })
+            .limit(3),
+          supabase.from("post_comments").select("id", { count: "exact", head: true }).eq("post_id", post.id),
         ]);
+        const userIds = Array.from(new Set((comments ?? []).map((c) => c.user_id)));
+        const { data: commentProfiles } = userIds.length
+          ? await supabase.from("profiles").select("id,username,avatar_url").in("id", userIds)
+          : { data: [] as { id: string; username: string; avatar_url: string | null }[] };
+        const profileMap = new Map((commentProfiles ?? []).map((p) => [p.id, p]));
+        const commentsWithProfiles = (comments ?? []).map((c) => ({
+          ...c,
+          profiles: profileMap.get(c.user_id)
+            ? { username: profileMap.get(c.user_id)!.username, avatar_url: profileMap.get(c.user_id)!.avatar_url }
+            : null,
+        }));
         return {
           ...post,
           profiles: profile ?? null,
           post_likes: likes ?? [],
-          post_comments: comments ?? [],
+          post_comments: commentsWithProfiles,
+          comments_count: commentsCount ?? commentsWithProfiles.length,
         };
       })
     );
@@ -328,9 +347,35 @@ function FeedPage() {
                     className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
                   >
                     <MessageCircle className="h-4 w-4" />
-                    {p.post_comments.length}
+                    {p.comments_count}
                   </Link>
                 </div>
+
+                {p.post_comments.length > 0 && (
+                  <div className="space-y-1.5 px-4 pb-4">
+                    {p.post_comments.map((c) => (
+                      <div key={c.id} className="flex gap-2 text-sm">
+                        <Link
+                          to="/profile/$username"
+                          params={{ username: c.profiles?.username ?? "" }}
+                          className="shrink-0 font-medium hover:underline"
+                        >
+                          @{c.profiles?.username ?? "user"}
+                        </Link>
+                        <span className="line-clamp-1 text-muted-foreground">{c.body}</span>
+                      </div>
+                    ))}
+                    {p.comments_count > p.post_comments.length && (
+                      <Link
+                        to="/post/$postId"
+                        params={{ postId: p.id }}
+                        className="block text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Alle {p.comments_count} Kommentare ansehen
+                      </Link>
+                    )}
+                  </div>
+                )}
               </li>
             );
           })}
