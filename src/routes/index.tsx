@@ -21,7 +21,8 @@ type Post = {
   author_id: string;
   profiles: { username: string; display_name: string | null; avatar_url: string | null; verified: boolean } | null;
   post_likes: { user_id: string }[];
-  post_comments: { id: string }[];
+  post_comments: { id: string; body: string; user_id: string; profiles: { username: string; avatar_url: string | null } | null }[];
+  comments_count: number;
 };
 
 function FeedPage() {
