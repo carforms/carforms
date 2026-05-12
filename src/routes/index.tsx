@@ -347,9 +347,35 @@ function FeedPage() {
                     className="flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
                   >
                     <MessageCircle className="h-4 w-4" />
-                    {p.post_comments.length}
+                    {p.comments_count}
                   </Link>
                 </div>
+
+                {p.post_comments.length > 0 && (
+                  <div className="space-y-1.5 px-4 pb-4">
+                    {p.post_comments.map((c) => (
+                      <div key={c.id} className="flex gap-2 text-sm">
+                        <Link
+                          to="/profile/$username"
+                          params={{ username: c.profiles?.username ?? "" }}
+                          className="shrink-0 font-medium hover:underline"
+                        >
+                          @{c.profiles?.username ?? "user"}
+                        </Link>
+                        <span className="line-clamp-1 text-muted-foreground">{c.body}</span>
+                      </div>
+                    ))}
+                    {p.comments_count > p.post_comments.length && (
+                      <Link
+                        to="/post/$postId"
+                        params={{ postId: p.id }}
+                        className="block text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Alle {p.comments_count} Kommentare ansehen
+                      </Link>
+                    )}
+                  </div>
+                )}
               </li>
             );
           })}
