@@ -129,9 +129,7 @@ function FeedPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="sr-only">Feed</h1>
-        <div />
+      <div className="mb-4 flex items-center justify-end">
         <Button
           type="button"
           variant="ghost"
