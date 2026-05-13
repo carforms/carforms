@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Disallow: /login
+Disallow: /signup
+Disallow: /profile/edit
+Disallow: /post/new
+Disallow: /lovable/
+
+Sitemap: https://carforms.de/sitemap.xml

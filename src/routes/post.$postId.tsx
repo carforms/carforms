@@ -12,6 +12,57 @@ import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/post/$postId")({
   component: PostDetailPage,
+  loader: async ({ params }) => {
+    const { data: post } = await supabase
+      .from("posts")
+      .select("id,title,body,image_url,created_at,author_id")
+      .eq("id", params.postId)
+      .maybeSingle();
+    if (!post) return { post: null, authorUsername: null as string | null };
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", post.author_id)
+      .maybeSingle();
+    return { post, authorUsername: profile?.username ?? null };
+  },
+  head: ({ loaderData, params }) => {
+    const post = loaderData?.post;
+    if (!post) {
+      return {
+        meta: [
+          { title: "Beitrag nicht gefunden | Carforms" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const title = (post.title?.trim() || `Beitrag von @${loaderData?.authorUsername ?? "carforms"}`).slice(0, 100);
+    const description = (post.body?.trim() || post.title?.trim() || "Entdecke Builds, Stance, JDM und mehr auf Carforms.")
+      .replace(/\s+/g, " ")
+      .slice(0, 160);
+    const fullTitle = `${title} | Carforms`;
+    const url = `https://carforms.de/post/${params.postId}`;
+    return {
+      meta: [
+        { title: fullTitle },
+        { name: "description", content: description },
+        { property: "og:title", content: fullTitle },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        ...(post.image_url
+          ? [
+              { property: "og:image", content: post.image_url },
+              { name: "twitter:image", content: post.image_url },
+            ]
+          : []),
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: fullTitle },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
 });
 
 type PostDetail = {

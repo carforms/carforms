@@ -15,6 +15,50 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export const Route = createFileRoute("/communities_/$slug")({
   component: CommunityDetail,
+  loader: async ({ params }) => {
+    const { data: community } = await supabase
+      .from("communities")
+      .select("id,name,slug,description,cover_url")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    return { community };
+  },
+  head: ({ loaderData, params }) => {
+    const c = loaderData?.community;
+    if (!c) {
+      return {
+        meta: [
+          { title: "Community nicht gefunden | Carforms" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const title = `${c.name} Community | Carforms`;
+    const description = (c.description?.trim() || `Tritt der ${c.name}-Community auf Carforms bei. Posts, Diskussionen und Builds aus der Szene.`)
+      .replace(/\s+/g, " ")
+      .slice(0, 160);
+    const url = `https://carforms.de/communities/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        ...(c.cover_url
+          ? [
+              { property: "og:image", content: c.cover_url },
+              { name: "twitter:image", content: c.cover_url },
+            ]
+          : []),
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
 });
 
 type Community = {
