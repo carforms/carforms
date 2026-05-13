@@ -214,22 +214,46 @@ function FeedPage() {
                 </Button>
               </div>
 
-              {/* Stats row */}
-              <div className="mt-4 flex gap-8 text-center">
-                <div>
-                  <p className="text-2xl font-bold text-white">JDM</p>
-                  <p className="text-xs text-white/40">Kultur</p>
-                </div>
-                <div className="w-px bg-white/10" />
-                <div>
-                  <p className="text-2xl font-bold text-white">Stance</p>
-                  <p className="text-xs text-white/40">Ästhetik</p>
-                </div>
-                <div className="w-px bg-white/10" />
-                <div>
-                  <p className="text-2xl font-bold text-white">Drift</p>
-                  <p className="text-xs text-white/40">& Track</p>
-                </div>
+              {/* Category cards */}
+              <div className="mt-6 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+                {[
+                  {
+                    name: "JDM",
+                    subtitle: "Kultur aus Japan",
+                    fallback: "https://images.unsplash.com/photo-1547744822-0a1d3a4d9c1c?auto=format&fit=crop&w=800&q=80",
+                  },
+                  {
+                    name: "Stance",
+                    subtitle: "Tief & breit",
+                    fallback: "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=800&q=80",
+                  },
+                  {
+                    name: "Drift",
+                    subtitle: "Sideways & Track",
+                    fallback: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+                  },
+                ].map((cat, idx) => {
+                  const img = heroImages[idx] ?? cat.fallback;
+                  return (
+                    <Link
+                      key={cat.name}
+                      to="/communities"
+                      className="group relative block h-28 overflow-hidden rounded-xl border border-white/10 transition-all hover:border-white/30 hover:shadow-lg sm:h-32"
+                    >
+                      <img
+                        src={img}
+                        alt={cat.name}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+                      <div className="relative z-10 flex h-full flex-col justify-end p-3 text-left">
+                        <p className="text-lg font-bold leading-tight text-white">{cat.name}</p>
+                        <p className="text-xs text-white/70">{cat.subtitle}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </section>
