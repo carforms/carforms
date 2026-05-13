@@ -324,6 +324,7 @@ export type Database = {
         Row: {
           author_id: string
           body: string | null
+          category: Database["public"]["Enums"]["post_category"] | null
           community_id: string | null
           created_at: string
           id: string
@@ -333,6 +334,7 @@ export type Database = {
         Insert: {
           author_id: string
           body?: string | null
+          category?: Database["public"]["Enums"]["post_category"] | null
           community_id?: string | null
           created_at?: string
           id?: string
@@ -342,6 +344,7 @@ export type Database = {
         Update: {
           author_id?: string
           body?: string | null
+          category?: Database["public"]["Enums"]["post_category"] | null
           community_id?: string | null
           created_at?: string
           id?: string
@@ -477,6 +480,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      post_category: "jdm" | "stance" | "drift" | "track"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -605,6 +609,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      post_category: ["jdm", "stance", "drift", "track"],
     },
   },
 } as const
