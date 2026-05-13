@@ -19,6 +19,7 @@ import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
 import { Route as PostNewRouteImport } from './routes/post.new'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as CommunitiesSlugRouteImport } from './routes/communities_.$slug'
+import { Route as CategoryCategoryRouteImport } from './routes/category.$category'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -73,6 +74,11 @@ const CommunitiesSlugRoute = CommunitiesSlugRouteImport.update({
   path: '/communities/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoryCategoryRoute = CategoryCategoryRouteImport.update({
+  id: '/category/$category',
+  path: '/category/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/category/$category': typeof CategoryCategoryRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/category/$category': typeof CategoryCategoryRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/category/$category': typeof CategoryCategoryRoute
   '/communities_/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/search'
     | '/signup'
+    | '/category/$category'
     | '/communities/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/search'
     | '/signup'
+    | '/category/$category'
     | '/communities/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/search'
     | '/signup'
+    | '/category/$category'
     | '/communities_/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
+  CategoryCategoryRoute: typeof CategoryCategoryRoute
   CommunitiesSlugRoute: typeof CommunitiesSlugRoute
   PostPostIdRoute: typeof PostPostIdRoute
   PostNewRoute: typeof PostNewRoute
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/category/$category': {
+      id: '/category/$category'
+      path: '/category/$category'
+      fullPath: '/category/$category'
+      preLoaderRoute: typeof CategoryCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -302,6 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
+  CategoryCategoryRoute: CategoryCategoryRoute,
   CommunitiesSlugRoute: CommunitiesSlugRoute,
   PostPostIdRoute: PostPostIdRoute,
   PostNewRoute: PostNewRoute,
