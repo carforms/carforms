@@ -234,6 +234,57 @@ function FeedPage() {
             </div>
           </section>
 
+          {/* Was die Community teilt */}
+          {posts.length > 0 && (
+            <section className="mb-12">
+              <div className="mb-4 flex items-end justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight">Was die Community teilt</h2>
+                  <p className="text-sm text-muted-foreground">Aktuelle Builds & Beiträge aus der Szene</p>
+                </div>
+                <Link
+                  to="/communities"
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Mehr sehen →
+                </Link>
+              </div>
+              <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {posts.slice(0, 3).map((p) => {
+                  const username = p.profiles?.username ?? "";
+                  const caption = p.title ?? p.body ?? "";
+                  return (
+                    <li key={p.id}>
+                      <Link
+                        to="/post/$postId"
+                        params={{ postId: p.id }}
+                        className="group block overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-border hover:shadow-md"
+                      >
+                        {p.image_url ? (
+                          <img
+                            src={p.image_url}
+                            alt={p.title ?? "Beitrag"}
+                            className="aspect-square w-full object-cover transition-opacity group-hover:opacity-95"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-card to-accent/20 px-4 text-center text-sm text-muted-foreground">
+                            {caption || "Beitrag"}
+                          </div>
+                        )}
+                        <div className="space-y-1 p-3">
+                          <p className="truncate text-xs font-medium">@{username}</p>
+                          {caption && (
+                            <p className="line-clamp-2 text-xs text-muted-foreground">{caption}</p>
+                          )}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
         </>
         );
       })()}
