@@ -161,11 +161,30 @@ function FeedPage() {
         </Button>
       </div>
 
-      {!user && (
+      {!user && (() => {
+        const heroImages = posts.map((p) => p.image_url).filter((u): u is string => !!u).slice(0, 9);
+        const fallback = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80";
+        const tiles = heroImages.length > 0 ? heroImages : [fallback];
+        return (
         <>
           <section className="relative mb-12 overflow-hidden rounded-3xl border border-border/60 bg-card">
-            {/* Background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 opacity-80" />
+            {/* Background mosaic of recent post images */}
+            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-0">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div key={i} className="overflow-hidden">
+                  <img
+                    src={tiles[i % tiles.length]}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-full w-full object-cover blur-sm scale-110"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-black/70" />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/60" />
 
             {/* Content */}
             <div className="relative z-10 flex flex-col items-center gap-6 px-6 py-16 text-center">
@@ -216,7 +235,8 @@ function FeedPage() {
           </section>
 
         </>
-      )}
+        );
+      })()}
 
       {/* Car of the Week - always visible */}
       <div className="mb-8 flex items-center justify-between rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3">
