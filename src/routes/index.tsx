@@ -235,7 +235,8 @@ function FeedPage() {
           </section>
 
         </>
-      )}
+        );
+      })()}
 
       {/* Car of the Week - always visible */}
       <div className="mb-8 flex items-center justify-between rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3">
