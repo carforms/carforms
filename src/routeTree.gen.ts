@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as LoginRouteImport } from './routes/login'
@@ -24,6 +25,11 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/communities_/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/search'
     | '/signup'
+    | '/sitemap.xml'
     | '/category/$category'
     | '/communities/$slug'
     | '/post/$postId'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/search'
     | '/signup'
+    | '/sitemap.xml'
     | '/category/$category'
     | '/communities/$slug'
     | '/post/$postId'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/search'
     | '/signup'
+    | '/sitemap.xml'
     | '/category/$category'
     | '/communities_/$slug'
     | '/post/$postId'
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CategoryCategoryRoute: typeof CategoryCategoryRoute
   CommunitiesSlugRoute: typeof CommunitiesSlugRoute
   PostPostIdRoute: typeof PostPostIdRoute
@@ -215,6 +228,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   CategoryCategoryRoute: CategoryCategoryRoute,
   CommunitiesSlugRoute: CommunitiesSlugRoute,
   PostPostIdRoute: PostPostIdRoute,
