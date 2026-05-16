@@ -36,11 +36,15 @@ export const Route = createFileRoute("/post/$postId")({
         ],
       };
     }
-    const title = (post.title?.trim() || `Beitrag von @${loaderData?.authorUsername ?? "carforms"}`).slice(0, 100);
+    const SUFFIX = " | Carforms";
+    const MAX = 60;
+    const rawTitle = post.title?.trim() || `Beitrag von @${loaderData?.authorUsername ?? "carforms"}`;
+    const titleBudget = MAX - SUFFIX.length;
+    const title = rawTitle.length > titleBudget ? rawTitle.slice(0, titleBudget - 1).trimEnd() + "…" : rawTitle;
+    const fullTitle = `${title}${SUFFIX}`;
     const description = (post.body?.trim() || post.title?.trim() || "Entdecke Builds, Stance, JDM und mehr auf Carforms.")
       .replace(/\s+/g, " ")
       .slice(0, 160);
-    const fullTitle = `${title} | Carforms`;
     const url = `https://carforms.de/post/${params.postId}`;
     return {
       meta: [
@@ -61,6 +65,28 @@ export const Route = createFileRoute("/post/$postId")({
         { name: "twitter:description", content: description },
       ],
       links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: title,
+            description,
+            image: post.image_url ? [post.image_url] : undefined,
+            datePublished: post.created_at,
+            dateModified: post.created_at,
+            author: {
+              "@type": "Person",
+              name: loaderData?.authorUsername ?? "carforms",
+              url: loaderData?.authorUsername
+                ? `https://carforms.de/profile/${loaderData.authorUsername}`
+                : undefined,
+            },
+            mainEntityOfPage: url,
+          }),
+        },
+      ],
     };
   },
 });
