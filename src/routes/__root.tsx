@@ -45,6 +45,7 @@ export const Route = createRootRoute({
       { property: "og:image", content: "https://res.cloudinary.com/daqvusmpz/image/upload/v1778424461/IMG_7822_jghwgg.jpg" },
       { name: "twitter:image", content: "https://res.cloudinary.com/daqvusmpz/image/upload/v1778424461/IMG_7822_jghwgg.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "google-site-verification", content: "O7uTFAiVTypsNBeWxKgT-VVAjWlS6ql5CiCxFe9It_Y" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
     scripts: [
