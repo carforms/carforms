@@ -29,6 +29,56 @@ import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/communities")({
+  loader: async () => {
+    const { data } = await supabase
+      .from("communities")
+      .select("slug,name,description")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    return { communities: data ?? [] };
+  },
+  head: ({ loaderData }) => {
+    const title = "Communities — Auto-Szene Deutschland | Carforms";
+    const description =
+      "Entdecke und gründe Communities für JDM, Stance, Drift und Track auf Carforms. Vernetze dich mit Auto-Enthusiasten aus ganz Deutschland.";
+    const url = "https://carforms.de/communities";
+    const itemList = (loaderData?.communities ?? []).slice(0, 20).map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://carforms.de/communities/${c.slug}`,
+      name: c.name,
+    }));
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: title,
+            description,
+            url,
+            mainEntity: {
+              "@type": "ItemList",
+              itemListElement: itemList,
+            },
+          }),
+        },
+      ],
+    };
+  },
   component: CommunitiesPage,
 });
 

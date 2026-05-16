@@ -10,6 +10,69 @@ import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/profile/$username")({
+  loader: async ({ params }) => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id,username,display_name,bio,location,avatar_url")
+      .eq("username", params.username)
+      .maybeSingle();
+    return { profile };
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData?.profile;
+    const url = `https://carforms.de/profile/${params.username}`;
+    if (!p) {
+      return {
+        meta: [
+          { title: `@${params.username} nicht gefunden | Carforms` },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const name = p.display_name || p.username;
+    const title = `${name} (@${p.username}) | Carforms`;
+    const description = (p.bio?.trim() || `${name} auf Carforms — Beiträge, Builds und Auto-Kultur aus der deutschen Szene.`)
+      .replace(/\s+/g, " ")
+      .slice(0, 160);
+    return {
+      meta: [
+        { title: title.length > 60 ? title.slice(0, 59) + "…" : title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+        ...(p.avatar_url
+          ? [
+              { property: "og:image", content: p.avatar_url },
+              { name: "twitter:image", content: p.avatar_url },
+            ]
+          : []),
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ProfilePage",
+            url,
+            mainEntity: {
+              "@type": "Person",
+              name,
+              alternateName: p.username,
+              description: p.bio || undefined,
+              image: p.avatar_url || undefined,
+              address: p.location ? { "@type": "PostalAddress", addressLocality: p.location } : undefined,
+            },
+          }),
+        },
+      ],
+    };
+  },
   component: ProfilePage,
 });
 

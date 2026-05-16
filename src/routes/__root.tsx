@@ -47,6 +47,34 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Carforms",
+          alternateName: "carforms",
+          url: "https://carforms.de",
+          description:
+            "carforms – Die deutsche Community für Auto-Enthusiasten. JDM, Stance, Drift und mehr.",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://carforms.de/search?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+          publisher: {
+            "@type": "Organization",
+            name: "Carforms",
+            url: "https://carforms.de",
+            logo: {
+              "@type": "ImageObject",
+              url: "https://res.cloudinary.com/daqvusmpz/image/upload/v1778424461/IMG_7822_jghwgg.jpg",
+            },
+          },
+        }),
+      },
+    ],
     styles: [
       {
         children: `[data-lovable-badge], #lovable-badge, .lovable-badge, a[href*="lovable.dev"] { display: none !important; opacity: 0 !important; pointer-events: none !important; }`,
