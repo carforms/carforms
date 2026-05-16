@@ -34,7 +34,7 @@ export function Header() {
         <Link to="/" aria-label="carforms — Startseite" className="flex h-10 shrink-0 items-center">
           <img
             src={logoUrl}
-            alt="carforms"
+            alt="Carforms Logo – Auto-Community"
             className="h-10 w-auto rounded-md bg-white object-contain p-1"
           />
         </Link>
@@ -42,12 +42,15 @@ export function Header() {
         <form
           className="relative ml-2 hidden flex-1 md:block"
           onSubmit={submitSearch}
+          role="search"
+          aria-label="Carforms durchsuchen"
         >
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Suche, Services, Werkstätten…"
+            aria-label="Suche nach Beiträgen, Profilen und Communities"
             className="h-10 w-full rounded-full border border-border/60 bg-card/60 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-border"
           />
         </form>
@@ -137,13 +140,14 @@ export function Header() {
 
       {mobileSearchOpen && (
         <div className="border-t border-border/60 bg-background/95 px-4 py-3 md:hidden">
-          <form className="relative" onSubmit={submitSearch}>
+          <form className="relative" onSubmit={submitSearch} role="search" aria-label="Carforms durchsuchen">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               autoFocus
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Suche, Services, Werkstätten…"
+              aria-label="Suche nach Beiträgen, Profilen und Communities"
               className="h-10 w-full rounded-full border border-border/60 bg-card/60 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-border"
             />
           </form>

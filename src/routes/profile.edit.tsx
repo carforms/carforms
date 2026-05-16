@@ -126,8 +126,8 @@ function EditProfilePage() {
         </div>
 
         <div className="space-y-2">
-          <Label>Username</Label>
-          <Input value={profile?.username ?? ""} disabled />
+          <Label htmlFor="username">Username</Label>
+          <Input id="username" value={profile?.username ?? ""} disabled />
         </div>
         <div className="space-y-2">
           <Label htmlFor="dn">Anzeigename</Label>

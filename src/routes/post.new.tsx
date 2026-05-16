@@ -104,16 +104,16 @@ function NewPostPage() {
     <main className="mx-auto max-w-xl px-4 py-8">
       <h1 className="text-2xl font-bold">Neuer Beitrag</h1>
       <form onSubmit={submit} className="mt-6 space-y-5">
-        <label className="flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-card/40 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground">
+        <label className="flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-card/40 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground" aria-label="Beitragsbild hochladen">
           {preview ? (
-            <img src={preview} alt="Vorschau" className="h-full w-full object-cover" />
+            <img src={preview} alt="Vorschau des Beitragsbildes" className="h-full w-full object-cover" />
           ) : (
             <>
-              <ImagePlus className="h-8 w-8" />
+              <ImagePlus className="h-8 w-8" aria-hidden="true" />
               <span className="mt-2 text-sm">Bild hinzufügen</span>
             </>
           )}
-          <input type="file" accept="image/*" className="hidden" onChange={onImage} />
+          <input type="file" accept="image/*" className="hidden" onChange={onImage} aria-label="Bilddatei für Beitrag auswählen" />
         </label>
 
         <div className="space-y-2">
@@ -137,9 +137,9 @@ function NewPostPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label>Community (optional)</Label>
+          <Label htmlFor="community">Community (optional)</Label>
           <Select value={community} onValueChange={setCommunity}>
-            <SelectTrigger>
+            <SelectTrigger id="community" aria-label="Community auswählen">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -292,6 +292,7 @@ function CommunitiesPage() {
                               className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
                               onClick={(e) => e.stopPropagation()}
                               title="Community löschen (Admin)"
+                              aria-label={`Community ${c.name} löschen`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
