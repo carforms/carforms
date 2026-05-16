@@ -287,7 +287,7 @@ function FeedPage() {
                         {p.image_url ? (
                           <img
                             src={p.image_url}
-                            alt={p.title ?? "Beitrag"}
+                            alt={p.title ?? `Beitrag von @${username}`}
                             className="aspect-square w-full object-cover transition-opacity group-hover:opacity-95"
                             loading="lazy"
                           />
@@ -401,7 +401,7 @@ function FeedPage() {
                   {p.image_url ? (
                     <img
                       src={p.image_url}
-                      alt={p.title ?? "Beitrag"}
+                      alt={p.title ?? `Beitrag von @${username}`}
                       className="aspect-square w-full object-cover transition-opacity group-hover:opacity-95"
                       loading="lazy"
                     />
