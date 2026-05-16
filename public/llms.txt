@@ -1,0 +1,23 @@
+# Carforms
+
+> Carforms ist die deutsche Community für Auto-Enthusiasten — JDM, Stance, Drift und Track. Teile deinen Build, diskutiere Designs, werde Teil der Szene.
+
+Carforms ist eine soziale Plattform für Auto-Liebhaber im deutschsprachigen Raum. Nutzer:innen teilen Builds, Fotos und Geschichten, gründen und beitreten Communities und folgen anderen Enthusiasten.
+
+## Pages
+
+- [Startseite](/): Aktueller Community-Feed mit Beiträgen aus der Szene
+- [Communities](/communities): Übersicht aller Auto-Communities auf Carforms
+- [Suche](/search): Beiträge, Profile und Communities durchsuchen
+
+## Kategorien
+
+- [JDM](/category/jdm): Japanische Auto-Kultur — Skyline, Supra, Silvia, RX-7
+- [Stance](/category/stance): Static, Airride, Camber und Fitment
+- [Drift](/category/drift): Drift-Builds, Missiles und Wettkampfautos
+- [Track](/category/track): Trackday-Autos, Rennwagen und Motorsport
+
+## Optional
+
+- [Anmelden](/login): Login für bestehende Mitglieder
+- [Registrieren](/signup): Kostenloses Konto erstellen

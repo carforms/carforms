@@ -10,6 +10,69 @@ import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/profile/$username")({
+  loader: async ({ params }) => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id,username,display_name,bio,location,avatar_url")
+      .eq("username", params.username)
+      .maybeSingle();
+    return { profile };
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData?.profile;
+    const url = `https://carforms.de/profile/${params.username}`;
+    if (!p) {
+      return {
+        meta: [
+          { title: `@${params.username} nicht gefunden | Carforms` },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const name = p.display_name || p.username;
+    const title = `${name} (@${p.username}) | Carforms`;
+    const description = (p.bio?.trim() || `${name} auf Carforms — Beiträge, Builds und Auto-Kultur aus der deutschen Szene.`)
+      .replace(/\s+/g, " ")
+      .slice(0, 160);
+    return {
+      meta: [
+        { title: title.length > 60 ? title.slice(0, 59) + "…" : title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+        ...(p.avatar_url
+          ? [
+              { property: "og:image", content: p.avatar_url },
+              { name: "twitter:image", content: p.avatar_url },
+            ]
+          : []),
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ProfilePage",
+            url,
+            mainEntity: {
+              "@type": "Person",
+              name,
+              alternateName: p.username,
+              description: p.bio || undefined,
+              image: p.avatar_url || undefined,
+              address: p.location ? { "@type": "PostalAddress", addressLocality: p.location } : undefined,
+            },
+          }),
+        },
+      ],
+    };
+  },
   component: ProfilePage,
 });
 
@@ -220,7 +283,7 @@ function ProfilePage() {
                 <Button size="sm" variant="secondary" className="rounded-full" onClick={() => navigate({ to: "/profile/edit" })}>
                   Profil bearbeiten
                 </Button>
-                <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" onClick={() => navigate({ to: "/profile/edit" })}>
+                <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" aria-label="Profil-Einstellungen öffnen" onClick={() => navigate({ to: "/profile/edit" })}>
                   <Settings className="h-4 w-4" />
                 </Button>
               </>
@@ -243,6 +306,7 @@ function ProfilePage() {
               size="icon"
               variant="secondary"
               className="h-9 w-9 rounded-full"
+              aria-label="Profil-Link teilen"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 toast.success("Link kopiert");
@@ -324,7 +388,7 @@ function ProfilePage() {
             <li key={p.id} className="aspect-square overflow-hidden rounded-md bg-card">
               <Link to="/post/$postId" params={{ postId: p.id }} className="block h-full w-full">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.title ?? ""} className="h-full w-full object-cover transition-opacity hover:opacity-90" />
+                  <img src={p.image_url} alt={p.title ?? `Beitrag von @${profile.username}`} className="h-full w-full object-cover transition-opacity hover:opacity-90" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center p-3 text-center text-xs text-muted-foreground">
                     {p.title ?? "Post"}

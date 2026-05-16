@@ -24,10 +24,23 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/category/track", changefreq: "weekly", priority: "0.7" },
         ];
 
-        const [{ data: posts }, { data: communities }] = await Promise.all([
+        const [{ data: posts }, { data: communities }, { data: profiles }] = await Promise.all([
           supabase.from("posts").select("id, created_at").order("created_at", { ascending: false }).limit(5000),
           supabase.from("communities").select("slug, created_at").order("created_at", { ascending: false }).limit(1000),
+          supabase.from("profiles").select("username, created_at").order("created_at", { ascending: false }).limit(5000),
         ]);
+
+        entries.push({ path: "/search", changefreq: "weekly", priority: "0.4" });
+
+        for (const p of profiles ?? []) {
+          if (!p.username) continue;
+          entries.push({
+            path: `/profile/${p.username}`,
+            lastmod: p.created_at ? new Date(p.created_at).toISOString() : undefined,
+            changefreq: "weekly",
+            priority: "0.5",
+          });
+        }
 
         for (const p of posts ?? []) {
           entries.push({
