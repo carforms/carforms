@@ -283,7 +283,7 @@ function ProfilePage() {
                 <Button size="sm" variant="secondary" className="rounded-full" onClick={() => navigate({ to: "/profile/edit" })}>
                   Profil bearbeiten
                 </Button>
-                <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" onClick={() => navigate({ to: "/profile/edit" })}>
+                <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" aria-label="Profil-Einstellungen öffnen" onClick={() => navigate({ to: "/profile/edit" })}>
                   <Settings className="h-4 w-4" />
                 </Button>
               </>
@@ -306,6 +306,7 @@ function ProfilePage() {
               size="icon"
               variant="secondary"
               className="h-9 w-9 rounded-full"
+              aria-label="Profil-Link teilen"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 toast.success("Link kopiert");
@@ -387,7 +388,7 @@ function ProfilePage() {
             <li key={p.id} className="aspect-square overflow-hidden rounded-md bg-card">
               <Link to="/post/$postId" params={{ postId: p.id }} className="block h-full w-full">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.title ?? ""} className="h-full w-full object-cover transition-opacity hover:opacity-90" />
+                  <img src={p.image_url} alt={p.title ?? `Beitrag von @${profile.username}`} className="h-full w-full object-cover transition-opacity hover:opacity-90" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center p-3 text-center text-xs text-muted-foreground">
                     {p.title ?? "Post"}

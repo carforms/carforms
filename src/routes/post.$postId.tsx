@@ -310,14 +310,14 @@ function PostDetailPage() {
             </div>
           </Link>
           {isAuthor && (
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" onClick={deletePost}>
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" onClick={deletePost} aria-label="Beitrag löschen">
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
 
         {post.image_url && (
-          <img src={post.image_url} alt={post.title ?? "Beitrag"} className="aspect-square w-full object-cover" />
+          <img src={post.image_url} alt={post.title ?? `Beitrag von @${post.profiles?.username ?? "carforms"}`} className="aspect-square w-full object-cover" />
         )}
 
         <div className="space-y-3 p-4">
@@ -354,12 +354,14 @@ function PostDetailPage() {
                 maxLength={500}
                 className="h-10 flex-1 rounded-full border border-border/60 bg-card/60 px-4 text-sm outline-none focus:border-border"
               />
-              <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                <ImagePlus className="h-4 w-4" />
+              <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" aria-label="Bild zum Kommentar hinzufügen">
+                <span className="sr-only">Bild zum Kommentar hinzufügen</span>
+                <ImagePlus className="h-4 w-4" aria-hidden="true" />
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
+                  aria-label="Bilddatei für Kommentar auswählen"
                   onChange={(e) => {
                     const file = e.target.files?.[0] ?? null;
                     if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
