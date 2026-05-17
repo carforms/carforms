@@ -202,6 +202,27 @@ function CommunitiesPage() {
     load();
   };
 
+  const openEdit = (c: Community) => {
+    setEditing(c);
+    setEditName(c.name);
+    setEditDescription(c.description ?? "");
+  };
+
+  const saveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    const trimmedName = editName.trim();
+    if (!trimmedName) return toast.error("Name darf nicht leer sein");
+    const { error } = await supabase
+      .from("communities")
+      .update({ name: trimmedName, description: editDescription.trim() || null })
+      .eq("id", editing.id);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success("Community aktualisiert.");
+    setEditing(null);
+    load();
+  };
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8 flex items-end justify-between gap-4">
