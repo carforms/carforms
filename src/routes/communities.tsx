@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, ShieldAlert, Trash2 } from "lucide-react";
+import { Plus, Users, ShieldAlert, Trash2, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
