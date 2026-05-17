@@ -374,6 +374,25 @@ function CommunitiesPage() {
           })}
         </ul>
       )}
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Community bearbeiten</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={saveEdit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ename">Name</Label>
+              <Input id="ename" required maxLength={60} value={editName} onChange={(e) => setEditName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edesc">Beschreibung</Label>
+              <Textarea id="edesc" maxLength={300} value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
+            </div>
+            <Button type="submit" className="w-full rounded-full">Speichern</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
