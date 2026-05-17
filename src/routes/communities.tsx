@@ -308,6 +308,21 @@ function CommunitiesPage() {
                     </span>
                     <div className="flex items-center gap-2">
                       {isAdmin && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEdit(c);
+                          }}
+                          title="Community bearbeiten (Admin)"
+                          aria-label={`Community ${c.name} bearbeiten`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {isAdmin && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
