@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, ShieldAlert, Trash2 } from "lucide-react";
+import { Plus, Users, ShieldAlert, Trash2, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -100,6 +100,9 @@ function CommunitiesPage() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [editing, setEditing] = useState<Community | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   useEffect(() => {
     if (!user) {
@@ -199,6 +202,27 @@ function CommunitiesPage() {
     load();
   };
 
+  const openEdit = (c: Community) => {
+    setEditing(c);
+    setEditName(c.name);
+    setEditDescription(c.description ?? "");
+  };
+
+  const saveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    const trimmedName = editName.trim();
+    if (!trimmedName) return toast.error("Name darf nicht leer sein");
+    const { error } = await supabase
+      .from("communities")
+      .update({ name: trimmedName, description: editDescription.trim() || null })
+      .eq("id", editing.id);
+    if (error) return toast.error(toUserMessage(error));
+    toast.success("Community aktualisiert.");
+    setEditing(null);
+    load();
+  };
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8 flex items-end justify-between gap-4">
@@ -284,6 +308,21 @@ function CommunitiesPage() {
                     </span>
                     <div className="flex items-center gap-2">
                       {isAdmin && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEdit(c);
+                          }}
+                          title="Community bearbeiten (Admin)"
+                          aria-label={`Community ${c.name} bearbeiten`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {isAdmin && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
@@ -335,6 +374,25 @@ function CommunitiesPage() {
           })}
         </ul>
       )}
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Community bearbeiten</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={saveEdit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ename">Name</Label>
+              <Input id="ename" required maxLength={60} value={editName} onChange={(e) => setEditName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edesc">Beschreibung</Label>
+              <Textarea id="edesc" maxLength={300} value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
+            </div>
+            <Button type="submit" className="w-full rounded-full">Speichern</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
