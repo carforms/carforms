@@ -25,11 +25,22 @@ type Post = {
   comments_count: number;
 };
 
+type TrendingPost = {
+  id: string;
+  title: string | null;
+  image_url: string | null;
+  like_count: number;
+};
+
+let cachedPosts: Post[] = [];
+let cachedTrending: TrendingPost[] = [];
+
 function FeedPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<Post[]>(cachedPosts);
+  const [trendingPosts, setTrendingPosts] = useState<TrendingPost[]>(cachedTrending);
+  const [loading, setLoading] = useState(cachedPosts.length === 0);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
