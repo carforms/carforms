@@ -115,13 +115,6 @@ function FeedPage() {
     setTrendingPosts(sorted);
   };
 
-  // Fire fetches immediately on mount (outside useEffect for fastest start)
-  if (typeof window !== "undefined" && !(FeedPage as any).__started) {
-    (FeedPage as any).__started = true;
-    load();
-    loadTrending();
-  }
-
   useEffect(() => {
     load();
     loadTrending();
