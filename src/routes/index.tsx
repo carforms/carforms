@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, MessageCircle, RefreshCw, Trophy } from "lucide-react";
+import { Heart, MessageCircle, RefreshCw, Trophy, TrendingUp } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -25,11 +25,22 @@ type Post = {
   comments_count: number;
 };
 
+type TrendingPost = {
+  id: string;
+  title: string | null;
+  image_url: string | null;
+  like_count: number;
+};
+
+let cachedPosts: Post[] = [];
+let cachedTrending: TrendingPost[] = [];
+
 function FeedPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<Post[]>(cachedPosts);
+  const [trendingPosts, setTrendingPosts] = useState<TrendingPost[]>(cachedTrending);
+  const [loading, setLoading] = useState(cachedPosts.length === 0);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
@@ -75,12 +86,38 @@ function FeedPage() {
         };
       })
     );
-    setPosts(enriched as unknown as Post[]);
+    const enrichedPosts = enriched as unknown as Post[];
+    cachedPosts = enrichedPosts;
+    setPosts(enrichedPosts);
     setLoading(false);
+  };
+
+  const loadTrending = async () => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const { data } = await supabase
+      .from("posts")
+      .select("id, title, image_url, created_at, post_likes(user_id)")
+      .gte("created_at", sevenDaysAgo.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (!data) return;
+    const sorted = data
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        image_url: p.image_url,
+        like_count: (p.post_likes as { user_id: string }[] | null)?.length ?? 0,
+      }))
+      .sort((a, b) => b.like_count - a.like_count)
+      .slice(0, 10);
+    cachedTrending = sorted;
+    setTrendingPosts(sorted);
   };
 
   useEffect(() => {
     load();
+    loadTrending();
 
     let subscribed = false;
     const channel = supabase
@@ -326,6 +363,39 @@ function FeedPage() {
           <Link to="/communities">Zur Abstimmung</Link>
         </Button>
       </div>
+
+      {trendingPosts.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="h-4 w-4 text-orange-500" />
+            <p className="text-sm font-semibold">Trending diese Woche</p>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {trendingPosts.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => navigate({ to: "/post/$postId", params: { postId: p.id } })}
+                className="shrink-0 w-[140px] rounded-xl overflow-hidden border border-border/60 bg-card hover:border-border transition-all text-left"
+              >
+                {p.image_url ? (
+                  <img src={p.image_url} alt={p.title ?? "Trending Post"} className="w-full h-[100px] object-cover" />
+                ) : (
+                  <div className="w-full h-[100px] bg-accent/50 flex items-center justify-center p-2 text-center">
+                    <p className="text-xs font-medium line-clamp-3">{p.title}</p>
+                  </div>
+                )}
+                <div className="p-2">
+                  <p className="text-xs font-medium truncate">{p.title ?? "Post"}</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Heart className="h-3 w-3 text-red-500 fill-red-500" />
+                    <span className="text-xs text-muted-foreground">{p.like_count}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <ul className="space-y-6">
