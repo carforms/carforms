@@ -86,12 +86,45 @@ function FeedPage() {
         };
       })
     );
-    setPosts(enriched as unknown as Post[]);
+    const enrichedPosts = enriched as unknown as Post[];
+    cachedPosts = enrichedPosts;
+    setPosts(enrichedPosts);
     setLoading(false);
   };
 
+  const loadTrending = async () => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const { data } = await supabase
+      .from("posts")
+      .select("id, title, image_url, created_at, post_likes(user_id)")
+      .gte("created_at", sevenDaysAgo.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (!data) return;
+    const sorted = data
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        image_url: p.image_url,
+        like_count: (p.post_likes as { user_id: string }[] | null)?.length ?? 0,
+      }))
+      .sort((a, b) => b.like_count - a.like_count)
+      .slice(0, 10);
+    cachedTrending = sorted;
+    setTrendingPosts(sorted);
+  };
+
+  // Fire fetches immediately on mount (outside useEffect for fastest start)
+  if (typeof window !== "undefined" && !(FeedPage as any).__started) {
+    (FeedPage as any).__started = true;
+    load();
+    loadTrending();
+  }
+
   useEffect(() => {
     load();
+    loadTrending();
 
     let subscribed = false;
     const channel = supabase
