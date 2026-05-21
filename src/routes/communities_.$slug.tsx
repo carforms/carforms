@@ -346,14 +346,16 @@ function CommunityDetail() {
         .from("community_members")
         .insert({ community_id: community.id, user_id: user.id })
         .then(({ error }) => {
-          if (!error) {
+          // Treat duplicate-key (already a member) as success
+          if (!error || (error as { code?: string }).code === "23505") {
             setIsMember(true);
-            setMemberCount((c) => c + 1);
+            if (!error) setMemberCount((c) => c + 1);
             loadMessages();
           }
         });
+    } else {
+      loadMessages();
     }
-    loadMessages();
     const channel = supabase
       .channel("community-chat-" + community.id)
       .on(
@@ -371,7 +373,7 @@ function CommunityDetail() {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatOpen, community?.id]);
+  }, [chatOpen, community?.id, user?.id, isMember]);
 
   const pickFile = (file: File | null) => {
     if (!file) return;
