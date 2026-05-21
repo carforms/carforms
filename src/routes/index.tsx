@@ -398,9 +398,9 @@ function FeedPage() {
       )}
 
       {loading ? (
-        <ul className="space-y-6">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[0, 1, 2].map((i) => (
-            <li key={i} className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+            <li key={i} className="flex flex-col h-full overflow-hidden rounded-2xl border border-border/60 bg-card">
               <div className="flex items-center gap-3 p-4">
                 <Skeleton className="h-9 w-9 rounded-full" />
                 <div className="flex-1 space-y-2">
@@ -408,7 +408,7 @@ function FeedPage() {
                   <Skeleton className="h-2.5 w-16" />
                 </div>
               </div>
-              <Skeleton className="aspect-square w-full rounded-none" />
+              <Skeleton className="aspect-[4/3] w-full rounded-none" />
               <div className="space-y-2 p-4">
                 <Skeleton className="h-3 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
