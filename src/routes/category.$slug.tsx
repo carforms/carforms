@@ -1,46 +1,57 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft } from "lucide-react";
 
 const CATEGORIES = {
   jdm: {
     slug: "jdm",
-    name: "JDM",
-    title: "JDM Cars Deutschland — Builds, Stance & Tuning | carforms",
+    name: "JDM Kultur",
+    title: "JDM Kultur — Carforms Community",
     description:
-      "Entdecke die deutsche JDM-Szene auf carforms. Aktuelle Builds, Stance-Setups und Tuning-Projekte rund um Skyline, Supra, Silvia, RX-7 und mehr.",
-    h1: "JDM — Japanische Auto-Kultur",
+      "Entdecke die deutsche JDM-Szene auf carforms. Skyline, Supra, Silvia, RX-7 und alles rund um japanische Auto-Kultur.",
+    h1: "JDM Kultur",
     subtitle:
-      "Die deutsche Community für JDM-Enthusiasten. Skyline, Supra, Silvia, RX-7 und alles dazwischen.",
+      "Skyline, Supra, Silvia, RX-7 und alles dazwischen. Die japanische Auto-Kultur auf carforms.",
   },
   stance: {
     slug: "stance",
-    name: "Stance",
-    title: "Stance Cars Deutschland — Static, Air & Camber | carforms",
+    name: "Stance & Static",
+    title: "Stance & Static — Carforms Community",
     description:
-      "Stance, Static, Airride und aggressive Fitments. Sieh dir die neuesten Stance-Builds aus der deutschen Szene auf carforms an.",
-    h1: "Stance — Fitment ist alles",
+      "Static, Airride, Camber und perfektes Fitment. Sieh dir die neuesten Stance-Builds aus der deutschen Szene an.",
+    h1: "Stance & Static",
     subtitle:
-      "Static, Airride, Camber und perfektes Fitment. Die deutsche Stance-Community auf carforms.",
+      "Static, Airride, Camber und perfektes Fitment. Die Stance-Community auf carforms.",
   },
   drift: {
     slug: "drift",
-    name: "Drift",
-    title: "Drift Cars Deutschland — Builds & Setups | carforms",
+    name: "Drift & Sideways",
+    title: "Drift & Sideways — Carforms Community",
     description:
-      "Drift-Builds, Missiles und Wettkampfautos aus Deutschland. Die deutsche Drift-Community teilt Setups, Bilder und Erfahrungen auf carforms.",
-    h1: "Drift — Sideways Culture",
+      "Drift-Builds, Missiles und Wettkampfautos. Die deutsche Drift-Community teilt Setups und Erfahrungen auf carforms.",
+    h1: "Drift & Sideways",
     subtitle:
-      "Drift-Builds, Missiles und Wettkampfautos. Die deutsche Drift-Community auf carforms.",
+      "Drift-Builds, Missiles und Wettkampfautos. Die Drift-Community auf carforms.",
   },
   track: {
     slug: "track",
-    name: "Track",
-    title: "Track Cars Deutschland — Trackday & Motorsport | carforms",
+    name: "Track & Rennsport",
+    title: "Track & Rennsport — Carforms Community",
     description:
-      "Trackday-Autos, Rennwagen und Motorsport-Builds. Sieh dir die neuesten Track-Projekte aus der deutschen Szene auf carforms an.",
-    h1: "Track — Built for the Circuit",
+      "Trackday-Autos, Rennwagen und Motorsport-Builds. Die neuesten Track-Projekte aus der deutschen Szene.",
+    h1: "Track & Rennsport",
     subtitle:
-      "Trackday-Builds, Rennwagen und Motorsport. Die deutsche Track-Community auf carforms.",
+      "Trackday-Builds, Rennwagen und Motorsport. Die Track-Community auf carforms.",
+  },
+  oldtimer: {
+    slug: "oldtimer",
+    name: "Oldtimer & Klassiker",
+    title: "Oldtimer & Klassiker — Carforms Community",
+    description:
+      "Klassische Automobile, Restaurationen und Oldtimer-Projekte. Teile deinen Klassiker auf carforms.",
+    h1: "Oldtimer & Klassiker",
+    subtitle:
+      "Klassische Automobile, Restaurationen und Oldtimer-Projekte. Die Oldtimer-Community auf carforms.",
   },
 } as const;
 
@@ -56,9 +67,9 @@ type Post = {
   profiles: { username: string; display_name: string | null; avatar_url: string | null } | null;
 };
 
-export const Route = createFileRoute("/category/$category")({
+export const Route = createFileRoute("/category/$slug")({
   loader: async ({ params }) => {
-    const slug = params.category as CategorySlug;
+    const slug = params.slug as CategorySlug;
     const meta = CATEGORIES[slug];
     if (!meta) throw notFound();
 
@@ -102,6 +113,9 @@ export const Route = createFileRoute("/category/$category")({
         { name: "twitter:description", content: meta.description },
         { name: "twitter:card", content: "summary_large_image" },
       ],
+      links: [
+        { rel: "canonical", href: `https://carforms.de/category/${meta.slug}` },
+      ],
     };
   },
   notFoundComponent: () => (
@@ -119,6 +133,14 @@ function CategoryPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
+      <Link
+        to="/communities"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Zurück zu Communities
+      </Link>
+
       <header className="mb-10">
         <p className="text-xs uppercase tracking-widest text-muted-foreground">Kategorie</p>
         <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{meta.h1}</h1>
@@ -186,8 +208,8 @@ function CategoryPage() {
             .map((c) => (
               <li key={c.slug}>
                 <Link
-                  to="/category/$category"
-                  params={{ category: c.slug }}
+                  to="/category/$slug"
+                  params={{ slug: c.slug }}
                   className="inline-block rounded-full border border-border/60 bg-card px-4 py-1.5 text-sm hover:border-border hover:bg-secondary"
                 >
                   {c.name}

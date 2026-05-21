@@ -20,7 +20,7 @@ import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
 import { Route as PostNewRouteImport } from './routes/post.new'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as CommunitiesSlugRouteImport } from './routes/communities_.$slug'
-import { Route as CategoryCategoryRouteImport } from './routes/category.$category'
+import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -80,9 +80,9 @@ const CommunitiesSlugRoute = CommunitiesSlugRouteImport.update({
   path: '/communities/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CategoryCategoryRoute = CategoryCategoryRouteImport.update({
-  id: '/category/$category',
-  path: '/category/$category',
+const CategorySlugRoute = CategorySlugRouteImport.update({
+  id: '/category/$slug',
+  path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailQueueProcessRoute =
@@ -109,7 +109,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/category/$category': typeof CategoryCategoryRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -126,7 +126,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/category/$category': typeof CategoryCategoryRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -144,7 +144,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/category/$category': typeof CategoryCategoryRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/communities_/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -163,7 +163,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/signup'
     | '/sitemap.xml'
-    | '/category/$category'
+    | '/category/$slug'
     | '/communities/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -180,7 +180,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/signup'
     | '/sitemap.xml'
-    | '/category/$category'
+    | '/category/$slug'
     | '/communities/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -197,7 +197,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/signup'
     | '/sitemap.xml'
-    | '/category/$category'
+    | '/category/$slug'
     | '/communities_/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -215,7 +215,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  CategoryCategoryRoute: typeof CategoryCategoryRoute
+  CategorySlugRoute: typeof CategorySlugRoute
   CommunitiesSlugRoute: typeof CommunitiesSlugRoute
   PostPostIdRoute: typeof PostPostIdRoute
   PostNewRoute: typeof PostNewRoute
@@ -305,11 +305,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/category/$category': {
-      id: '/category/$category'
-      path: '/category/$category'
-      fullPath: '/category/$category'
-      preLoaderRoute: typeof CategoryCategoryRouteImport
+    '/category/$slug': {
+      id: '/category/$slug'
+      path: '/category/$slug'
+      fullPath: '/category/$slug'
+      preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
@@ -343,7 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  CategoryCategoryRoute: CategoryCategoryRoute,
+  CategorySlugRoute: CategorySlugRoute,
   CommunitiesSlugRoute: CommunitiesSlugRoute,
   PostPostIdRoute: PostPostIdRoute,
   PostNewRoute: PostNewRoute,
@@ -356,3 +356,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
