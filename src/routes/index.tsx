@@ -472,7 +472,7 @@ function FeedPage() {
                     <img
                       src={p.image_url}
                       alt={p.title ?? `Beitrag von @${username}`}
-                      className="aspect-square w-full object-cover transition-opacity group-hover:opacity-95"
+                      className="aspect-[4/3] w-full object-cover transition-opacity group-hover:opacity-95"
                       loading="lazy"
                     />
                   ) : (p.title || p.body) ? (
