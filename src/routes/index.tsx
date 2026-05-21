@@ -440,7 +440,7 @@ function FeedPage() {
       )}
 
       {loading ? (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[0, 1, 2].map((i) => (
             <li key={i} className="flex flex-col h-full overflow-hidden rounded-2xl border border-border/60 bg-card">
               <div className="flex items-center gap-3 p-4">
@@ -468,7 +468,7 @@ function FeedPage() {
           )}
         </div>
       ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {posts.map((p) => {
             const liked = !!user && p.post_likes.some((l) => l.user_id === user.id);
             const username = p.profiles?.username ?? "";
