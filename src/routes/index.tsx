@@ -41,6 +41,8 @@ function FeedPage() {
   const [posts, setPosts] = useState<Post[]>(cachedPosts);
   const [trendingPosts, setTrendingPosts] = useState<TrendingPost[]>(cachedTrending);
   const [loading, setLoading] = useState(cachedPosts.length === 0);
+  const [trendingLoading, setTrendingLoading] = useState(false);
+  const [trendingError, setTrendingError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
@@ -93,26 +95,36 @@ function FeedPage() {
   };
 
   const loadTrending = async () => {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const { data } = await supabase
-      .from("posts")
-      .select("id, title, image_url, created_at, post_likes(user_id)")
-      .gte("created_at", sevenDaysAgo.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(20);
-    if (!data) return;
-    const sorted = data
-      .map((p) => ({
-        id: p.id,
-        title: p.title,
-        image_url: p.image_url,
-        like_count: (p.post_likes as { user_id: string }[] | null)?.length ?? 0,
-      }))
-      .sort((a, b) => b.like_count - a.like_count)
-      .slice(0, 10);
-    cachedTrending = sorted;
-    setTrendingPosts(sorted);
+    setTrendingLoading(true);
+    setTrendingError(null);
+    try {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const { data, error } = await supabase
+        .from("posts")
+        .select("id, title, image_url, created_at, post_likes(user_id)")
+        .gte("created_at", sevenDaysAgo.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      if (!data) return;
+      const sorted = data
+        .map((p) => ({
+          id: p.id,
+          title: p.title,
+          image_url: p.image_url,
+          like_count: (p.post_likes as { user_id: string }[] | null)?.length ?? 0,
+        }))
+        .sort((a, b) => b.like_count - a.like_count)
+        .slice(0, 10);
+      cachedTrending = sorted;
+      setTrendingPosts(sorted);
+    } catch (err) {
+      console.error("[trending] load error:", err);
+      setTrendingError("Trending konnte nicht geladen werden");
+    } finally {
+      setTrendingLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -364,36 +376,66 @@ function FeedPage() {
         </Button>
       </div>
 
-      {trendingPosts.length > 0 && (
+      {(trendingLoading || trendingPosts.length > 0 || trendingError) && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="h-4 w-4 text-orange-500" />
             <p className="text-sm font-semibold">Trending diese Woche</p>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {trendingPosts.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => navigate({ to: "/post/$postId", params: { postId: p.id } })}
-                className="shrink-0 w-[140px] rounded-xl overflow-hidden border border-border/60 bg-card hover:border-border transition-all text-left"
-              >
-                {p.image_url ? (
-                  <img src={p.image_url} alt={p.title ?? "Trending Post"} className="w-full h-[100px] object-cover" />
-                ) : (
-                  <div className="w-full h-[100px] bg-accent/50 flex items-center justify-center p-2 text-center">
-                    <p className="text-xs font-medium line-clamp-3">{p.title}</p>
-                  </div>
-                )}
-                <div className="p-2">
-                  <p className="text-xs font-medium truncate">{p.title ?? "Post"}</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Heart className="h-3 w-3 text-red-500 fill-red-500" />
-                    <span className="text-xs text-muted-foreground">{p.like_count}</span>
+          {trendingLoading ? (
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="shrink-0 w-[140px] rounded-xl overflow-hidden border border-border/60 bg-card"
+                >
+                  <Skeleton className="w-full h-[100px] rounded-none" />
+                  <div className="p-2 space-y-1.5">
+                    <Skeleton className="h-3 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 </div>
-              </button>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : trendingError ? (
+            <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-card px-4 py-3">
+              <p className="text-xs text-muted-foreground">{trendingError}</p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={loadTrending}
+                className="h-6 text-xs px-2"
+              >
+                Erneut versuchen
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {trendingPosts.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => navigate({ to: "/post/$postId", params: { postId: p.id } })}
+                  className="shrink-0 w-[140px] rounded-xl overflow-hidden border border-border/60 bg-card hover:border-border transition-all text-left"
+                >
+                  {p.image_url ? (
+                    <img src={p.image_url} alt={p.title ?? "Trending Post"} className="w-full h-[100px] object-cover" />
+                  ) : (
+                    <div className="w-full h-[100px] bg-accent/50 flex items-center justify-center p-2 text-center">
+                      <p className="text-xs font-medium line-clamp-3">{p.title}</p>
+                    </div>
+                  )}
+                  <div className="p-2">
+                    <p className="text-xs font-medium truncate">{p.title ?? "Post"}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Heart className="h-3 w-3 text-red-500 fill-red-500" />
+                      <span className="text-xs text-muted-foreground">{p.like_count}</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
