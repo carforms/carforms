@@ -20,6 +20,7 @@ import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
 import { Route as PostNewRouteImport } from './routes/post.new'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as CommunitiesSlugRouteImport } from './routes/communities_.$slug'
+import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as CategoryCategoryRouteImport } from './routes/category.$category'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -80,6 +81,11 @@ const CommunitiesSlugRoute = CommunitiesSlugRouteImport.update({
   path: '/communities/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategorySlugRoute = CategorySlugRouteImport.update({
+  id: '/category/$slug',
+  path: '/category/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoryCategoryRoute = CategoryCategoryRouteImport.update({
   id: '/category/$category',
   path: '/category/$category',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$category': typeof CategoryCategoryRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$category': typeof CategoryCategoryRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$category': typeof CategoryCategoryRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/communities_/$slug': typeof CommunitiesSlugRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/category/$category'
+    | '/category/$slug'
     | '/communities/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/category/$category'
+    | '/category/$slug'
     | '/communities/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/category/$category'
+    | '/category/$slug'
     | '/communities_/$slug'
     | '/post/$postId'
     | '/post/new'
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CategoryCategoryRoute: typeof CategoryCategoryRoute
+  CategorySlugRoute: typeof CategorySlugRoute
   CommunitiesSlugRoute: typeof CommunitiesSlugRoute
   PostPostIdRoute: typeof PostPostIdRoute
   PostNewRoute: typeof PostNewRoute
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/category/$slug': {
+      id: '/category/$slug'
+      path: '/category/$slug'
+      fullPath: '/category/$slug'
+      preLoaderRoute: typeof CategorySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/category/$category': {
       id: '/category/$category'
       path: '/category/$category'
@@ -344,6 +364,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CategoryCategoryRoute: CategoryCategoryRoute,
+  CategorySlugRoute: CategorySlugRoute,
   CommunitiesSlugRoute: CommunitiesSlugRoute,
   PostPostIdRoute: PostPostIdRoute,
   PostNewRoute: PostNewRoute,
