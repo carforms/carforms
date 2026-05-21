@@ -426,7 +426,7 @@ function FeedPage() {
           )}
         </div>
       ) : (
-        <ul className="space-y-6">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {posts.map((p) => {
             const liked = !!user && p.post_likes.some((l) => l.user_id === user.id);
             const username = p.profiles?.username ?? "";
