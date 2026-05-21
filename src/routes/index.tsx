@@ -433,7 +433,7 @@ function FeedPage() {
             return (
               <li
                 key={p.id}
-                className="group overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-border hover:shadow-md"
+                className="group flex flex-col h-full overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-border hover:shadow-md"
               >
                 {/* Author row — not part of the post link */}
                 <div className="flex items-center gap-3 p-4">
