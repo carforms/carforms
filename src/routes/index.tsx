@@ -41,6 +41,8 @@ function FeedPage() {
   const [posts, setPosts] = useState<Post[]>(cachedPosts);
   const [trendingPosts, setTrendingPosts] = useState<TrendingPost[]>(cachedTrending);
   const [loading, setLoading] = useState(cachedPosts.length === 0);
+  const [trendingLoading, setTrendingLoading] = useState(false);
+  const [trendingError, setTrendingError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
