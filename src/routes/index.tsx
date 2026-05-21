@@ -466,7 +466,7 @@ function FeedPage() {
                   to="/post/$postId"
                   params={{ postId: p.id }}
                   aria-label={p.title ?? "Beitrag öffnen"}
-                  className="block cursor-pointer"
+                  className="block cursor-pointer flex-1"
                 >
                   {p.image_url ? (
                     <img
