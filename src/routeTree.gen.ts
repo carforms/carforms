@@ -13,12 +13,14 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForumRouteImport } from './routes/forum'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
 import { Route as PostNewRouteImport } from './routes/post.new'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
+import { Route as ForumNewRouteImport } from './routes/forum.new'
 import { Route as CommunitiesSlugRouteImport } from './routes/communities_.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -43,6 +45,11 @@ const SearchRoute = SearchRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumRoute = ForumRouteImport.update({
+  id: '/forum',
+  path: '/forum',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesRoute = CommunitiesRouteImport.update({
@@ -75,6 +82,11 @@ const PostPostIdRoute = PostPostIdRouteImport.update({
   path: '/post/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumNewRoute = ForumNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ForumRoute,
+} as any)
 const CommunitiesSlugRoute = CommunitiesSlugRouteImport.update({
   id: '/communities_/$slug',
   path: '/communities/$slug',
@@ -105,12 +117,14 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
+  '/forum': typeof ForumRouteWithChildren
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
+  '/forum/new': typeof ForumNewRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
@@ -122,12 +136,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
+  '/forum': typeof ForumRouteWithChildren
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
+  '/forum/new': typeof ForumNewRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
@@ -140,12 +156,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
+  '/forum': typeof ForumRouteWithChildren
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities_/$slug': typeof CommunitiesSlugRoute
+  '/forum/new': typeof ForumNewRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
   '/profile/$username': typeof ProfileUsernameRoute
@@ -159,12 +177,14 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/communities'
+    | '/forum'
     | '/login'
     | '/search'
     | '/signup'
     | '/sitemap.xml'
     | '/category/$slug'
     | '/communities/$slug'
+    | '/forum/new'
     | '/post/$postId'
     | '/post/new'
     | '/profile/$username'
@@ -176,12 +196,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/communities'
+    | '/forum'
     | '/login'
     | '/search'
     | '/signup'
     | '/sitemap.xml'
     | '/category/$slug'
     | '/communities/$slug'
+    | '/forum/new'
     | '/post/$postId'
     | '/post/new'
     | '/profile/$username'
@@ -193,12 +215,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/communities'
+    | '/forum'
     | '/login'
     | '/search'
     | '/signup'
     | '/sitemap.xml'
     | '/category/$slug'
     | '/communities_/$slug'
+    | '/forum/new'
     | '/post/$postId'
     | '/post/new'
     | '/profile/$username'
@@ -211,6 +235,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunitiesRoute: typeof CommunitiesRoute
+  ForumRoute: typeof ForumRouteWithChildren
   LoginRoute: typeof LoginRoute
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
@@ -256,6 +281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum': {
+      id: '/forum'
+      path: '/forum'
+      fullPath: '/forum'
+      preLoaderRoute: typeof ForumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/communities': {
       id: '/communities'
       path: '/communities'
@@ -298,6 +330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/new': {
+      id: '/forum/new'
+      path: '/new'
+      fullPath: '/forum/new'
+      preLoaderRoute: typeof ForumNewRouteImport
+      parentRoute: typeof ForumRoute
+    }
     '/communities_/$slug': {
       id: '/communities_/$slug'
       path: '/communities/$slug'
@@ -336,9 +375,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ForumRouteChildren {
+  ForumNewRoute: typeof ForumNewRoute
+}
+
+const ForumRouteChildren: ForumRouteChildren = {
+  ForumNewRoute: ForumNewRoute,
+}
+
+const ForumRouteWithChildren = ForumRoute._addFileChildren(ForumRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunitiesRoute: CommunitiesRoute,
+  ForumRoute: ForumRouteWithChildren,
   LoginRoute: LoginRoute,
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
@@ -356,3 +406,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
