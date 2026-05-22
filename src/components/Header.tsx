@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, Users, Plus, LogOut, User as UserIcon } from "lucide-react";
+import { Search, Users, Plus, LogOut, User as UserIcon, MessageCircleQuestion } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,14 @@ export function Header() {
           >
             <Search className="h-5 w-5" />
           </button>
+
+          <Link
+            to="/forum"
+            className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <MessageCircleQuestion className="h-4 w-4" />
+            <span className="hidden sm:inline">Forum</span>
+          </Link>
 
           <Link
             to="/communities"
