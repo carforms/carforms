@@ -229,6 +229,174 @@ export type Database = {
         }
         Relationships: []
       }
+      forum_answer_likes: {
+        Row: {
+          answer_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_answer_likes_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "forum_answers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_answer_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_answers: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_best: boolean
+          question_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_best?: boolean
+          question_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_best?: boolean
+          question_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_answers_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "forum_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_question_likes: {
+        Row: {
+          created_at: string
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          question_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_question_likes_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "forum_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_question_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_questions: {
+        Row: {
+          author_id: string
+          body: string
+          community_id: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          solved: boolean
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          community_id?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          solved?: boolean
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          community_id?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          solved?: boolean
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_questions_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_questions_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string | null
