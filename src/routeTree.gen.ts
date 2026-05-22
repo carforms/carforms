@@ -21,6 +21,7 @@ import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
 import { Route as PostNewRouteImport } from './routes/post.new'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as ForumNewRouteImport } from './routes/forum.new'
+import { Route as ForumQuestionIdRouteImport } from './routes/forum.$questionId'
 import { Route as CommunitiesSlugRouteImport } from './routes/communities_.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -87,6 +88,11 @@ const ForumNewRoute = ForumNewRouteImport.update({
   path: '/new',
   getParentRoute: () => ForumRoute,
 } as any)
+const ForumQuestionIdRoute = ForumQuestionIdRouteImport.update({
+  id: '/$questionId',
+  path: '/$questionId',
+  getParentRoute: () => ForumRoute,
+} as any)
 const CommunitiesSlugRoute = CommunitiesSlugRouteImport.update({
   id: '/communities_/$slug',
   path: '/communities/$slug',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
+  '/forum/$questionId': typeof ForumQuestionIdRoute
   '/forum/new': typeof ForumNewRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
+  '/forum/$questionId': typeof ForumQuestionIdRoute
   '/forum/new': typeof ForumNewRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities_/$slug': typeof CommunitiesSlugRoute
+  '/forum/$questionId': typeof ForumQuestionIdRoute
   '/forum/new': typeof ForumNewRoute
   '/post/$postId': typeof PostPostIdRoute
   '/post/new': typeof PostNewRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/category/$slug'
     | '/communities/$slug'
+    | '/forum/$questionId'
     | '/forum/new'
     | '/post/$postId'
     | '/post/new'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/category/$slug'
     | '/communities/$slug'
+    | '/forum/$questionId'
     | '/forum/new'
     | '/post/$postId'
     | '/post/new'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/category/$slug'
     | '/communities_/$slug'
+    | '/forum/$questionId'
     | '/forum/new'
     | '/post/$postId'
     | '/post/new'
@@ -337,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForumNewRouteImport
       parentRoute: typeof ForumRoute
     }
+    '/forum/$questionId': {
+      id: '/forum/$questionId'
+      path: '/$questionId'
+      fullPath: '/forum/$questionId'
+      preLoaderRoute: typeof ForumQuestionIdRouteImport
+      parentRoute: typeof ForumRoute
+    }
     '/communities_/$slug': {
       id: '/communities_/$slug'
       path: '/communities/$slug'
@@ -376,10 +395,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface ForumRouteChildren {
+  ForumQuestionIdRoute: typeof ForumQuestionIdRoute
   ForumNewRoute: typeof ForumNewRoute
 }
 
 const ForumRouteChildren: ForumRouteChildren = {
+  ForumQuestionIdRoute: ForumQuestionIdRoute,
   ForumNewRoute: ForumNewRoute,
 }
 

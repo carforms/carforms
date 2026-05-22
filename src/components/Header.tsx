@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, Users, Plus, LogOut, User as UserIcon } from "lucide-react";
+import { Search, Users, Plus, LogOut, User as UserIcon, MessageCircleQuestion } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
