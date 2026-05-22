@@ -66,6 +66,14 @@ export function Header() {
           </button>
 
           <Link
+            to="/forum"
+            className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <MessageCircleQuestion className="h-4 w-4" />
+            <span className="hidden sm:inline">Forum</span>
+          </Link>
+
+          <Link
             to="/communities"
             className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
