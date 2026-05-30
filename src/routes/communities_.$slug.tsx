@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { validateImageFile } from "@/lib/upload-validation";
 
 export const Route = createFileRoute("/communities_/$slug")({
   component: CommunityDetail,
@@ -154,8 +155,9 @@ function CommunityDetail() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Bild darf maximal 10MB groß sein.");
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
     if (postImagePreview) URL.revokeObjectURL(postImagePreview);
@@ -228,6 +230,12 @@ function CommunityDetail() {
     setSavingMeta(true);
     let cover_url = community.cover_url;
     if (editCoverFile) {
+      const coverError = validateImageFile(editCoverFile);
+      if (coverError) {
+        toast.error(coverError);
+        setSavingMeta(false);
+        return;
+      }
       const url = await uploadToCloudinary(editCoverFile);
       if (!url) {
         setSavingMeta(false);
@@ -377,7 +385,13 @@ function CommunityDetail() {
 
   const pickFile = (file: File | null) => {
     if (!file) return;
-    if (file.size > MAX_ATTACHMENT_BYTES) {
+    if (file.type.startsWith("image/")) {
+      const imgError = validateImageFile(file);
+      if (imgError) {
+        toast.error(imgError);
+        return;
+      }
+    } else if (file.size > MAX_ATTACHMENT_BYTES) {
       toast.error("Datei darf maximal 10 MB groß sein.");
       return;
     }
@@ -506,7 +520,14 @@ function CommunityDetail() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="ccover">Cover-Bild (Thumbnail)</Label>
-                        <Input id="ccover" type="file" accept="image/*" onChange={(e) => setEditCoverFile(e.target.files?.[0] ?? null)} />
+                        <Input id="ccover" type="file" accept="image/*" onChange={(e) => {
+                          const f = e.target.files?.[0] ?? null;
+                          if (f) {
+                            const err = validateImageFile(f);
+                            if (err) { toast.error(err); e.target.value = ""; return; }
+                          }
+                          setEditCoverFile(f);
+                        }} />
                       </div>
                       <Button onClick={saveMeta} disabled={savingMeta} className="w-full rounded-full">
                         {savingMeta ? <Loader2 className="h-4 w-4 animate-spin" /> : "Speichern"}
