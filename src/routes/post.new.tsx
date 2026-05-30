@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toUserMessage } from "@/lib/errors";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,7 +96,7 @@ function NewPostPage() {
       community_id: community === "none" ? null : community,
     });
     setSaving(false);
-    if (error) return toast.error("Beitrag konnte nicht erstellt werden: " + error.message);
+    if (error) return toast.error(toUserMessage(error, "Beitrag konnte nicht erstellt werden."));
     toast.success("Beitrag veröffentlicht");
     navigate({ to: "/", replace: false });
   };

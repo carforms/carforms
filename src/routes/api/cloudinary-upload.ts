@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash } from "crypto";
+import { createClient } from "@supabase/supabase-js";
 
 const ALLOWED = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -9,6 +10,25 @@ export const Route = createFileRoute("/api/cloudinary-upload")({
     handlers: {
       POST: async ({ request }) => {
         try {
+          // Require authenticated Supabase user
+          const authHeader = request.headers.get("authorization") ?? "";
+          if (!authHeader.startsWith("Bearer ")) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+          }
+          const token = authHeader.slice("Bearer ".length);
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+          if (!supabaseUrl || !supabaseKey) {
+            return new Response(JSON.stringify({ error: "Auth not configured" }), { status: 500 });
+          }
+          const supabase = createClient(supabaseUrl, supabaseKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+          if (claimsError || !claimsData?.claims?.sub) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+          }
+
           const form = await request.formData();
           const file = form.get("file");
           if (!(file instanceof File)) {
