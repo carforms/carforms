@@ -24,6 +24,7 @@ import { Route as ForumNewRouteImport } from './routes/forum.new'
 import { Route as ForumQuestionIdRouteImport } from './routes/forum.$questionId'
 import { Route as CommunitiesSlugRouteImport } from './routes/communities_.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as ApiCloudinaryUploadRouteImport } from './routes/api/cloudinary-upload'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -103,6 +104,11 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCloudinaryUploadRoute = ApiCloudinaryUploadRouteImport.update({
+  id: '/api/cloudinary-upload',
+  path: '/api/cloudinary-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/cloudinary-upload': typeof ApiCloudinaryUploadRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/forum/$questionId': typeof ForumQuestionIdRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/cloudinary-upload': typeof ApiCloudinaryUploadRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
   '/forum/$questionId': typeof ForumQuestionIdRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/cloudinary-upload': typeof ApiCloudinaryUploadRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities_/$slug': typeof CommunitiesSlugRoute
   '/forum/$questionId': typeof ForumQuestionIdRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/api/cloudinary-upload'
     | '/category/$slug'
     | '/communities/$slug'
     | '/forum/$questionId'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/api/cloudinary-upload'
     | '/category/$slug'
     | '/communities/$slug'
     | '/forum/$questionId'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/api/cloudinary-upload'
     | '/category/$slug'
     | '/communities_/$slug'
     | '/forum/$questionId'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiCloudinaryUploadRoute: typeof ApiCloudinaryUploadRoute
   CategorySlugRoute: typeof CategorySlugRoute
   CommunitiesSlugRoute: typeof CommunitiesSlugRoute
   PostPostIdRoute: typeof PostPostIdRoute
@@ -370,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cloudinary-upload': {
+      id: '/api/cloudinary-upload'
+      path: '/api/cloudinary-upload'
+      fullPath: '/api/cloudinary-upload'
+      preLoaderRoute: typeof ApiCloudinaryUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -414,6 +434,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiCloudinaryUploadRoute: ApiCloudinaryUploadRoute,
   CategorySlugRoute: CategorySlugRoute,
   CommunitiesSlugRoute: CommunitiesSlugRoute,
   PostPostIdRoute: PostPostIdRoute,
