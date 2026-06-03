@@ -464,7 +464,7 @@ function FeedPage() {
         </div>
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {posts.map((p) => {
+          {interleaveByAuthor(posts).map((p) => {
             const liked = !!user && p.post_likes.some((l) => l.user_id === user.id);
             const username = p.profiles?.username ?? "";
             return (
