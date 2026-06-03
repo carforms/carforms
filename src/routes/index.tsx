@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import heroBg from "@/assets/hero-jdm.jpeg";
 
 export const Route = createFileRoute("/")({
   component: FeedPage,
