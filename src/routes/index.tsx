@@ -298,36 +298,6 @@ function FeedPage() {
                 </Button>
               </div>
 
-              {/* Category cards */}
-              <div className="mt-4 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-                {[
-                  { name: "JDM", subtitle: "Kultur aus Japan", fallback: "https://images.unsplash.com/photo-1547744822-0a1d3a4d9c1c?auto=format&fit=crop&w=800&q=80" },
-                  { name: "Stance", subtitle: "Tief & breit", fallback: "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=800&q=80" },
-                  { name: "Drift", subtitle: "Sideways & Track", fallback: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" },
-                ].map((cat, idx) => {
-                  const heroImages = posts.map((p) => p.image_url).filter((u): u is string => !!u);
-                  const img = heroImages[idx] ?? cat.fallback;
-                  return (
-                    <Link
-                      key={cat.name}
-                      to="/communities"
-                      className="group relative block min-h-[200px] overflow-hidden rounded-2xl border border-white/10 transition-all duration-300 hover:scale-[1.03] hover:border-white/30 hover:shadow-2xl"
-                    >
-                      <img
-                        src={img}
-                        alt={cat.name}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
-                      <div className="relative z-10 flex h-full min-h-[200px] flex-col justify-end p-4 text-left">
-                        <p className="text-xl font-bold leading-tight text-white">{cat.name}</p>
-                        <p className="text-sm text-white/70">{cat.subtitle}</p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
             </div>
           </section>
 
