@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import heroBg from "@/assets/hero-jdm.jpeg";
 
 export const Route = createFileRoute("/")({
   component: FeedPage,
@@ -210,46 +211,44 @@ function FeedPage() {
         </Button>
       </div>
 
-      {!user && (() => {
-        const heroImages = posts.map((p) => p.image_url).filter((u): u is string => !!u).slice(0, 9);
-        const fallback = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80";
-        const tiles = heroImages.length > 0 ? heroImages : [fallback];
-        return (
+      {!user && (
         <>
-          <section className="relative mb-12 overflow-hidden rounded-3xl border border-border/60 bg-card">
-            {/* Background mosaic of recent post images */}
-            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-0">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="overflow-hidden">
-                  <img
-                    src={tiles[i % tiles.length]}
-                    alt=""
-                    aria-hidden="true"
-                    className="h-full w-full object-cover blur-sm scale-110"
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-            </div>
-            {/* Dark overlay */}
-            <div className="absolute inset-0 bg-black/70" />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/60" />
+          <section className="relative mb-0 overflow-hidden rounded-3xl border border-border/60 bg-card" style={{ height: "90vh", minHeight: 600 }}>
+            {/* Hero background image — focused on the GT-R (right side) */}
+            <img
+              src={heroBg}
+              alt="JDM Nissan Skyline GT-R bei einem nächtlichen Car-Meet"
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{ objectPosition: "70% center" }}
+              loading="eager"
+            />
+            {/* Left-to-right dark gradient: 70% dark on left, image bleeds through on right */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col items-center gap-6 px-6 py-16 text-center">
+            <div className="relative z-10 mx-auto flex h-full max-w-3xl flex-col items-start justify-center gap-6 px-6 text-left sm:px-10">
               {/* Badge */}
-              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-widest text-white/60 uppercase">
+              <span className="rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-widest text-white/70 uppercase backdrop-blur-sm">
                 Die Community für Autokultur
               </span>
 
               {/* Headline */}
-              <h1 className="max-w-lg text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+              <h1 className="max-w-2xl text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-6xl">
                 Design & Ästhetik,<br />die bewegen.
               </h1>
 
+              {/* Trust elements */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/70 sm:text-sm">
+                <span>4.200+ Builds geteilt</span>
+                <span className="text-white/30">·</span>
+                <span>JDM · Stance · Drift · Classic</span>
+                <span className="text-white/30">·</span>
+                <span>Kostenlos & ohne Algorithmus</span>
+              </div>
+
               {/* Subline */}
-              <p className="max-w-md text-base text-white/50 leading-relaxed">
-                Carforms ist der Ort für alle die Autos nicht nur fahren — sondern verstehen.
+              <p className="max-w-md text-base text-white/60 leading-relaxed">
                 Teile deine Builds, diskutiere Designs und werde Teil der Szene.
               </p>
 
@@ -258,36 +257,25 @@ function FeedPage() {
                 <Button size="lg" className="rounded-full px-8 font-semibold" asChild>
                   <Link to="/signup">Kostenlos registrieren</Link>
                 </Button>
-                <Button size="lg" variant="outline" className="rounded-full px-8 border-white/10 text-white/70 hover:text-white" asChild>
+                <Button size="lg" variant="outline" className="rounded-full border-white/20 bg-white/5 px-8 text-white/80 backdrop-blur-sm hover:bg-white/10 hover:text-white" asChild>
                   <Link to="/login">Anmelden</Link>
                 </Button>
               </div>
 
               {/* Category cards */}
-              <div className="mt-6 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="mt-4 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
                 {[
-                  {
-                    name: "JDM",
-                    subtitle: "Kultur aus Japan",
-                    fallback: "https://images.unsplash.com/photo-1547744822-0a1d3a4d9c1c?auto=format&fit=crop&w=800&q=80",
-                  },
-                  {
-                    name: "Stance",
-                    subtitle: "Tief & breit",
-                    fallback: "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=800&q=80",
-                  },
-                  {
-                    name: "Drift",
-                    subtitle: "Sideways & Track",
-                    fallback: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
-                  },
+                  { name: "JDM", subtitle: "Kultur aus Japan", fallback: "https://images.unsplash.com/photo-1547744822-0a1d3a4d9c1c?auto=format&fit=crop&w=800&q=80" },
+                  { name: "Stance", subtitle: "Tief & breit", fallback: "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=800&q=80" },
+                  { name: "Drift", subtitle: "Sideways & Track", fallback: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" },
                 ].map((cat, idx) => {
+                  const heroImages = posts.map((p) => p.image_url).filter((u): u is string => !!u);
                   const img = heroImages[idx] ?? cat.fallback;
                   return (
                     <Link
                       key={cat.name}
                       to="/communities"
-                      className="group relative block h-28 overflow-hidden rounded-xl border border-white/10 transition-all hover:border-white/30 hover:shadow-lg sm:h-32"
+                      className="group relative block min-h-[200px] overflow-hidden rounded-2xl border border-white/10 transition-all duration-300 hover:scale-[1.03] hover:border-white/30 hover:shadow-2xl"
                     >
                       <img
                         src={img}
@@ -295,10 +283,10 @@ function FeedPage() {
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-                      <div className="relative z-10 flex h-full flex-col justify-end p-3 text-left">
-                        <p className="text-lg font-bold leading-tight text-white">{cat.name}</p>
-                        <p className="text-xs text-white/70">{cat.subtitle}</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
+                      <div className="relative z-10 flex h-full min-h-[200px] flex-col justify-end p-4 text-left">
+                        <p className="text-xl font-bold leading-tight text-white">{cat.name}</p>
+                        <p className="text-sm text-white/70">{cat.subtitle}</p>
                       </div>
                     </Link>
                   );
@@ -306,6 +294,13 @@ function FeedPage() {
               </div>
             </div>
           </section>
+
+          {/* Tagline divider */}
+          <div className="my-10 border-y border-border/40 bg-black/40 py-5 text-center">
+            <p className="text-sm italic tracking-wide text-muted-foreground sm:text-base">
+              Für alle, die Autos nicht nur fahren — sondern verstehen.
+            </p>
+          </div>
 
           {/* Was die Community teilt */}
           {posts.length > 0 && (
@@ -359,8 +354,8 @@ function FeedPage() {
             </section>
           )}
         </>
-        );
-      })()}
+      )}
+
 
       {/* Car of the Week - always visible */}
       <div className="mb-8 flex items-center justify-between rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3">
