@@ -36,41 +36,38 @@ type TrendingPost = {
 let cachedPosts: Post[] = [];
 let cachedTrending: TrendingPost[] = [];
 
-// Reorder posts so the same author never appears in two adjacent slots.
-// Greedy: at each step, pick the author with the most remaining posts that
-// isn't the previously placed one. Falls back to original order if impossible.
+// Round-robin reorder so the same author is spread across the feed
+// instead of being clustered. Each "pass" takes at most one post per author
+// (in original recency order), then repeats. Result: dominant authors appear
+// every Nth slot, never two in a row as long as ≥2 authors have posts left.
 function interleaveByAuthor(items: Post[]): Post[] {
   if (items.length < 2) return items;
   const buckets = new Map<string, Post[]>();
+  const order: string[] = [];
   for (const p of items) {
-    const list = buckets.get(p.author_id) ?? [];
-    list.push(p);
-    buckets.set(p.author_id, list);
+    if (!buckets.has(p.author_id)) {
+      buckets.set(p.author_id, []);
+      order.push(p.author_id);
+    }
+    buckets.get(p.author_id)!.push(p);
   }
   const result: Post[] = [];
-  let prev: string | null = null;
   while (result.length < items.length) {
-    let pickKey: string | null = null;
-    let pickLen = -1;
-    for (const [key, list] of buckets) {
-      if (list.length === 0 || key === prev) continue;
-      if (list.length > pickLen) {
-        pickLen = list.length;
-        pickKey = key;
+    let placed = 0;
+    for (const key of order) {
+      const list = buckets.get(key)!;
+      if (list.length === 0) continue;
+      // Avoid adjacency if there's still another author with posts.
+      if (result.length > 0 && result[result.length - 1].author_id === key) {
+        const othersHavePosts = order.some(
+          (k) => k !== key && (buckets.get(k)?.length ?? 0) > 0,
+        );
+        if (othersHavePosts) continue;
       }
+      result.push(list.shift()!);
+      placed++;
     }
-    if (!pickKey) {
-      // Only the previous author has posts left — accept adjacency.
-      for (const [key, list] of buckets) {
-        if (list.length > 0) {
-          pickKey = key;
-          break;
-        }
-      }
-      if (!pickKey) break;
-    }
-    result.push(buckets.get(pickKey)!.shift()!);
-    prev = pickKey;
+    if (placed === 0) break;
   }
   return result;
 }
