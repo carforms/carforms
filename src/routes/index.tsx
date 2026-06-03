@@ -36,6 +36,45 @@ type TrendingPost = {
 let cachedPosts: Post[] = [];
 let cachedTrending: TrendingPost[] = [];
 
+// Reorder posts so the same author never appears in two adjacent slots.
+// Greedy: at each step, pick the author with the most remaining posts that
+// isn't the previously placed one. Falls back to original order if impossible.
+function interleaveByAuthor(items: Post[]): Post[] {
+  if (items.length < 2) return items;
+  const buckets = new Map<string, Post[]>();
+  for (const p of items) {
+    const list = buckets.get(p.author_id) ?? [];
+    list.push(p);
+    buckets.set(p.author_id, list);
+  }
+  const result: Post[] = [];
+  let prev: string | null = null;
+  while (result.length < items.length) {
+    let pickKey: string | null = null;
+    let pickLen = -1;
+    for (const [key, list] of buckets) {
+      if (list.length === 0 || key === prev) continue;
+      if (list.length > pickLen) {
+        pickLen = list.length;
+        pickKey = key;
+      }
+    }
+    if (!pickKey) {
+      // Only the previous author has posts left — accept adjacency.
+      for (const [key, list] of buckets) {
+        if (list.length > 0) {
+          pickKey = key;
+          break;
+        }
+      }
+      if (!pickKey) break;
+    }
+    result.push(buckets.get(pickKey)!.shift()!);
+    prev = pickKey;
+  }
+  return result;
+}
+
 function FeedPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -464,7 +503,7 @@ function FeedPage() {
         </div>
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {posts.map((p) => {
+          {interleaveByAuthor(posts).map((p) => {
             const liked = !!user && p.post_likes.some((l) => l.user_id === user.id);
             const username = p.profiles?.username ?? "";
             return (
