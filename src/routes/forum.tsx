@@ -209,31 +209,31 @@ function ForumPage() {
     : questions;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <main className="mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-8">
+      <header className="mb-3 flex flex-wrap items-end justify-between gap-2 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Forum</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Stell Fragen — die Community antwortet.</p>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Forum</h1>
+          <p className="text-xs text-muted-foreground sm:mt-1 sm:text-sm">Stell Fragen — die Community antwortet.</p>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground sm:text-sm">
           {questions.length} {questions.length === 1 ? "Frage" : "Fragen"}
         </p>
       </header>
 
-      <div className="relative mb-4">
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative mb-2 sm:mb-4">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground sm:left-4" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Fragen, Tags, Communities oder User suchen…"
-          className="h-12 w-full rounded-2xl border border-border/60 bg-card/40 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-border"
+          placeholder="Suchen…"
+          className="h-9 w-full rounded-xl border border-border/60 bg-card/40 pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-border sm:h-12 sm:rounded-2xl sm:pl-11 sm:pr-4"
         />
       </div>
 
       <button
         type="button"
         onClick={() => navigate({ to: user ? "/forum/new" : "/login" })}
-        className="mb-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border/60 bg-card/20 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card/40 hover:text-foreground"
+        className="mb-3 flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 bg-card/20 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-card/40 hover:text-foreground sm:mb-6 sm:h-14 sm:rounded-2xl sm:text-sm"
       >
         <Plus className="h-4 w-4" />
         Frage stellen
@@ -257,17 +257,17 @@ function ForumPage() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-2 sm:space-y-4">
           {filtered.map((question) => (
-            <li key={question.id} className="overflow-hidden rounded-2xl border border-border/60 bg-card/40">
-              <article className="p-5">
-                <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <Link
-                    to="/profile/$username"
-                    params={{ username: question.profiles?.username ?? "" }}
-                    className="flex items-center gap-2 font-medium text-foreground hover:underline"
-                  >
-                    <Avatar className="h-6 w-6">
+            <li key={question.id} className="overflow-hidden rounded-xl border border-border/60 bg-card/40 sm:rounded-2xl">
+              <Link
+                to="/forum/$questionId"
+                params={{ questionId: question.id }}
+                className="block p-3 sm:p-5"
+              >
+                <div className="mb-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground sm:mb-3 sm:gap-3 sm:text-xs">
+                  <span className="flex items-center gap-1.5 font-medium text-foreground">
+                    <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
                       <AvatarImage src={question.profiles?.avatar_url ?? undefined} />
                       <AvatarFallback className="text-[10px]">
                         {question.profiles?.username?.[0]?.toUpperCase() ?? "U"}
@@ -277,36 +277,26 @@ function ForumPage() {
                       @{question.profiles?.username}
                       {question.profiles?.verified && <VerifiedBadge className="h-3 w-3" />}
                     </span>
-                  </Link>
+                  </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {timeAgo(question.created_at)}
                   </span>
-                  {question.community && (
-                    <Link
-                      to="/communities/$slug"
-                      params={{ slug: question.community.slug }}
-                      className="flex items-center gap-1 rounded-full border border-border/60 px-2 py-0.5 hover:bg-accent hover:text-foreground"
-                    >
-                      <Users className="h-3 w-3" />
-                      {question.community.name}
-                    </Link>
-                  )}
                 </div>
 
-                <h2 className="mb-2 text-lg font-semibold leading-snug">{question.title}</h2>
-                <p className="whitespace-pre-line text-sm text-muted-foreground">{question.body}</p>
+                <h2 className="mb-1 text-sm font-semibold leading-snug sm:mb-2 sm:text-lg">{question.title}</h2>
+                <p className="line-clamp-2 whitespace-pre-line text-xs text-muted-foreground sm:line-clamp-none sm:text-sm">{question.body}</p>
 
                 {question.image_url && (
                   <img
                     src={question.image_url}
                     alt={question.title}
-                    className="mt-3 max-h-64 w-auto rounded-xl border border-border/60 object-cover"
+                    className="mt-2 hidden max-h-64 w-auto rounded-xl border border-border/60 object-cover sm:mt-3 sm:block"
                   />
                 )}
 
                 {question.tags.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="mt-2 hidden flex-wrap gap-1.5 sm:mt-3 sm:flex">
                     {question.tags.map((tag) => (
                       <span
                         key={tag}
@@ -318,37 +308,37 @@ function ForumPage() {
                   </div>
                 )}
 
-                <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground sm:mt-4 sm:gap-2 sm:text-xs">
                   <button
                     type="button"
-                    onClick={() => toggleQuestionLike(question)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleQuestionLike(question);
+                    }}
                     aria-pressed={question.liked_by_me}
-                    className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 transition-colors hover:bg-accent hover:text-foreground ${
+                    className={`flex items-center gap-1 rounded-full border px-2 py-1 transition-colors hover:bg-accent hover:text-foreground sm:gap-1.5 sm:px-3 sm:py-1.5 ${
                       question.liked_by_me ? "border-primary/60 text-foreground" : "border-border/60"
                     }`}
                   >
-                    <ThumbsUp className={`h-3.5 w-3.5 ${question.liked_by_me ? "fill-current" : ""}`} />
-                    Hilfreich · {question.like_count}
+                    <ThumbsUp className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${question.liked_by_me ? "fill-current" : ""}`} />
+                    {question.like_count}
                   </button>
-                  <Link
-                    to="/forum/$questionId"
-                    params={{ questionId: question.id }}
-                    className="flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 transition-colors hover:bg-accent hover:text-foreground"
-                  >
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    {question.answers.length} {question.answers.length === 1 ? "Antwort" : "Antworten"}
-                  </Link>
+                  <span className="flex items-center gap-1 rounded-full border border-border/60 px-2 py-1 sm:gap-1.5 sm:px-3 sm:py-1.5">
+                    <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    {question.answers.length}
+                  </span>
                   {question.solved && (
-                    <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/40 px-3 py-1.5 text-emerald-500">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span className="flex items-center gap-1 rounded-full border border-emerald-500/40 px-2 py-1 text-emerald-500 sm:gap-1.5 sm:px-3 sm:py-1.5">
+                      <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       Gelöst
                     </span>
                   )}
                 </div>
-              </article>
+              </Link>
 
               {question.answers.length > 0 && (
-                <div className="space-y-3 border-l-2 border-border/60 bg-background/30 px-5 py-4">
+                <div className="hidden space-y-3 border-l-2 border-border/60 bg-background/30 px-5 py-4 sm:block">
                   {question.answers.slice(0, 3).map((a) => (
                     <div key={a.id}>
                       <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

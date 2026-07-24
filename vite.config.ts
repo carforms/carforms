@@ -1,12 +1,12 @@
 import path from "node:path";
 import { loadEnv } from "vite";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { nitro } from "nitro/vite";
+
 const serverEnv = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 Object.assign(process.env, serverEnv);
 
 export default defineConfig({
-  vite: {plugins: [nitro({ preset: "vercel" })],
+  vite: {
     resolve: {
       alias: {
         "entities/lib/decode.js": path.resolve(

@@ -9,6 +9,12 @@ type Profile = {
   avatar_url: string | null;
   bio: string | null;
   location: string | null;
+  car_make: string | null;
+  car_model: string | null;
+  interests: string[] | null;
+  pinned_badge_id: string | null;
+  onboarding_completed_at: string | null;
+  onboarding_dismissed_at: string | null;
 };
 
 type AuthCtx = {
@@ -31,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadProfile = async (uid: string) => {
     const { data } = await supabase
       .from("profiles")
-      .select("id,username,display_name,avatar_url,bio,location")
+      .select("id,username,display_name,avatar_url,bio,location,car_make,car_model,interests,pinned_badge_id,onboarding_completed_at,onboarding_dismissed_at")
       .eq("id", uid)
       .maybeSingle();
     setProfile(data as Profile | null);

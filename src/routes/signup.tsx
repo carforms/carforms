@@ -32,8 +32,8 @@ function SignupPage() {
     });
     setLoading(false);
     if (error) return toast.error(toUserMessage(error));
-    toast.success("Konto erstellt! Bitte E-Mail bestätigen.");
-    navigate({ to: "/" });
+    toast.success("Konto erstellt! Willkommen in der Boxengasse.");
+    navigate({ to: "/onboarding" });
   };
 
   const google = async () => {

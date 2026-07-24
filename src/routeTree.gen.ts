@@ -9,11 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForumRouteImport } from './routes/forum'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
@@ -25,10 +29,16 @@ import { Route as ForumQuestionIdRouteImport } from './routes/forum.$questionId'
 import { Route as CommunitiesSlugRouteImport } from './routes/communities_.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as ApiCloudinaryUploadRouteImport } from './routes/api/cloudinary-upload'
+import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const WaitlistRoute = WaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -44,6 +54,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -52,6 +67,16 @@ const LoginRoute = LoginRouteImport.update({
 const ForumRoute = ForumRouteImport.update({
   id: '/forum',
   path: '/forum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DatenschutzRoute = DatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesRoute = CommunitiesRouteImport.update({
@@ -109,6 +134,11 @@ const ApiCloudinaryUploadRoute = ApiCloudinaryUploadRouteImport.update({
   path: '/api/cloudinary-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminWaitlistRoute = AdminWaitlistRouteImport.update({
+  id: '/admin/waitlist',
+  path: '/admin/waitlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -129,11 +159,16 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/events': typeof EventsRoute
   '/forum': typeof ForumRouteWithChildren
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/waitlist': typeof WaitlistRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/api/cloudinary-upload': typeof ApiCloudinaryUploadRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
@@ -150,11 +185,16 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/events': typeof EventsRoute
   '/forum': typeof ForumRouteWithChildren
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/waitlist': typeof WaitlistRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/api/cloudinary-upload': typeof ApiCloudinaryUploadRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities/$slug': typeof CommunitiesSlugRoute
@@ -172,11 +212,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/events': typeof EventsRoute
   '/forum': typeof ForumRouteWithChildren
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/waitlist': typeof WaitlistRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/api/cloudinary-upload': typeof ApiCloudinaryUploadRoute
   '/category/$slug': typeof CategorySlugRoute
   '/communities_/$slug': typeof CommunitiesSlugRoute
@@ -195,11 +240,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/communities'
+    | '/datenschutz'
+    | '/events'
     | '/forum'
     | '/login'
+    | '/onboarding'
     | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/waitlist'
+    | '/admin/waitlist'
     | '/api/cloudinary-upload'
     | '/category/$slug'
     | '/communities/$slug'
@@ -216,11 +266,16 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/communities'
+    | '/datenschutz'
+    | '/events'
     | '/forum'
     | '/login'
+    | '/onboarding'
     | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/waitlist'
+    | '/admin/waitlist'
     | '/api/cloudinary-upload'
     | '/category/$slug'
     | '/communities/$slug'
@@ -237,11 +292,16 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/communities'
+    | '/datenschutz'
+    | '/events'
     | '/forum'
     | '/login'
+    | '/onboarding'
     | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/waitlist'
+    | '/admin/waitlist'
     | '/api/cloudinary-upload'
     | '/category/$slug'
     | '/communities_/$slug'
@@ -259,11 +319,16 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunitiesRoute: typeof CommunitiesRoute
+  DatenschutzRoute: typeof DatenschutzRoute
+  EventsRoute: typeof EventsRoute
   ForumRoute: typeof ForumRouteWithChildren
   LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  WaitlistRoute: typeof WaitlistRoute
+  AdminWaitlistRoute: typeof AdminWaitlistRoute
   ApiCloudinaryUploadRoute: typeof ApiCloudinaryUploadRoute
   CategorySlugRoute: typeof CategorySlugRoute
   CommunitiesSlugRoute: typeof CommunitiesSlugRoute
@@ -278,6 +343,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/waitlist': {
+      id: '/waitlist'
+      path: '/waitlist'
+      fullPath: '/waitlist'
+      preLoaderRoute: typeof WaitlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -299,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -311,6 +390,20 @@ declare module '@tanstack/react-router' {
       path: '/forum'
       fullPath: '/forum'
       preLoaderRoute: typeof ForumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/datenschutz': {
+      id: '/datenschutz'
+      path: '/datenschutz'
+      fullPath: '/datenschutz'
+      preLoaderRoute: typeof DatenschutzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communities': {
@@ -390,6 +483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCloudinaryUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/waitlist': {
+      id: '/admin/waitlist'
+      path: '/admin/waitlist'
+      fullPath: '/admin/waitlist'
+      preLoaderRoute: typeof AdminWaitlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -429,11 +529,16 @@ const ForumRouteWithChildren = ForumRoute._addFileChildren(ForumRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunitiesRoute: CommunitiesRoute,
+  DatenschutzRoute: DatenschutzRoute,
+  EventsRoute: EventsRoute,
   ForumRoute: ForumRouteWithChildren,
   LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  WaitlistRoute: WaitlistRoute,
+  AdminWaitlistRoute: AdminWaitlistRoute,
   ApiCloudinaryUploadRoute: ApiCloudinaryUploadRoute,
   CategorySlugRoute: CategorySlugRoute,
   CommunitiesSlugRoute: CommunitiesSlugRoute,
@@ -448,3 +553,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

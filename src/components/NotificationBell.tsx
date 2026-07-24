@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { getBadgeIcon } from "@/lib/badges";
 
 type Notification = {
   id: string;
@@ -22,11 +23,13 @@ type Notification = {
 };
 
 type Actor = { id: string; username: string; display_name: string | null; avatar_url: string | null };
+type BadgeMini = { id: string; name: string; icon_name: string; image_url: string | null };
 
 export function NotificationBell() {
   const { user } = useAuth();
   const [items, setItems] = useState<Notification[]>([]);
   const [actors, setActors] = useState<Record<string, Actor>>({});
+  const [badges, setBadges] = useState<Record<string, BadgeMini>>({});
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -47,7 +50,7 @@ export function NotificationBell() {
       if (!active) return;
       const list = (data ?? []) as Notification[];
       setItems(list);
-      await loadActors(list);
+      await Promise.all([loadActors(list), loadBadges(list)]);
     })();
 
     const channel = supabase
@@ -58,12 +61,15 @@ export function NotificationBell() {
         async (payload) => {
           const n = payload.new as Notification;
           setItems((prev) => [n, ...prev].slice(0, 20));
-          await loadActors([n]);
+          await Promise.all([loadActors([n]), loadBadges([n])]);
           if (n.type === "follow") {
             const actor = n.actor_id ? await fetchActor(n.actor_id) : null;
             toast.success(
               actor ? `${actor.display_name || actor.username} folgt dir jetzt` : "Du hast einen neuen Follower",
             );
+          } else if (n.type === "badge_earned" && n.entity_id) {
+            const b = await fetchBadge(n.entity_id);
+            toast.success(b ? `🏁 Neues Abzeichen freigeschaltet: ${b.name}!` : "🏁 Neues Abzeichen freigeschaltet!");
           }
         },
       )
@@ -74,6 +80,30 @@ export function NotificationBell() {
       supabase.removeChannel(channel);
     };
   }, [user]);
+
+  async function fetchBadge(id: string): Promise<BadgeMini | null> {
+    if (badges[id]) return badges[id];
+    const { data } = await supabase.from("badges").select("id,name,icon_name,image_url").eq("id", id).maybeSingle();
+    if (!data) return null;
+    setBadges((m) => ({ ...m, [data.id]: data as BadgeMini }));
+    return data as BadgeMini;
+  }
+
+  async function loadBadges(list: Notification[]) {
+    const ids = Array.from(
+      new Set(list.filter((n) => n.type === "badge_earned").map((n) => n.entity_id).filter(Boolean) as string[]),
+    );
+    const missing = ids.filter((id) => !badges[id]);
+    if (!missing.length) return;
+    const { data } = await supabase.from("badges").select("id,name,icon_name,image_url").in("id", missing);
+    if (data) {
+      setBadges((m) => {
+        const next = { ...m };
+        for (const b of data as BadgeMini[]) next[b.id] = b;
+        return next;
+      });
+    }
+  }
 
   async function fetchActor(id: string): Promise<Actor | null> {
     const { data } = await supabase
@@ -139,6 +169,25 @@ export function NotificationBell() {
           ) : (
             <ul>
               {items.map((n) => {
+                if (n.type === "badge_earned") {
+                  const b = n.entity_id ? badges[n.entity_id] : null;
+                  const Icon = getBadgeIcon(b?.icon_name ?? "Award");
+                  return (
+                    <li key={n.id} className={n.read_at ? "" : "bg-accent/40"}>
+                      <div className="flex items-center gap-3 px-3 py-2.5">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/15 text-amber-500">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm">
+                            🏁 Neues Abzeichen: <span className="font-semibold">{b?.name ?? "freigeschaltet"}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">{formatTime(n.created_at)}</p>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                }
                 const actor = n.actor_id ? actors[n.actor_id] : null;
                 return (
                   <li key={n.id} className={n.read_at ? "" : "bg-accent/40"}>

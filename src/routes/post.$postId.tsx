@@ -123,6 +123,10 @@ function PostDetailPage() {
   const [commentImagePreview, setCommentImagePreview] = useState<string | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [morePosts, setMorePosts] = useState<
+    { id: string; title: string | null; image_url: string | null; author_username: string | null }[]
+  >([]);
+
 
   async function load() {
     setLoading(true);
@@ -161,7 +165,27 @@ function PostDetailPage() {
       ((comments ?? []).map((c, i) => ({ ...c, profiles: commentProfiles[i] })) as unknown as Comment[]),
     );
     setLoading(false);
+
+    const { data: more } = await supabase
+      .from("posts")
+      .select("id,title,image_url,author_id")
+      .neq("id", postData.id)
+      .not("image_url", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(3);
+    const moreWithAuthors = await Promise.all(
+      (more ?? []).map(async (p) => {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", p.author_id)
+          .maybeSingle();
+        return { id: p.id, title: p.title, image_url: p.image_url, author_username: prof?.username ?? null };
+      }),
+    );
+    setMorePosts(moreWithAuthors);
   }
+
 
   useEffect(() => {
     load();
@@ -481,6 +505,40 @@ function PostDetailPage() {
           <img src={lightboxUrl} alt="Kommentar-Bild" className="max-h-full max-w-full rounded-lg object-contain" />
         </div>
       )}
+
+      {morePosts.length > 0 && (
+        <section className="mt-10 space-y-3">
+          <h2 className="text-sm font-semibold">Mehr Beiträge</h2>
+          <div className="grid grid-cols-3 gap-2">
+            {morePosts.map((p) => (
+              <Link
+                key={p.id}
+                to="/post/$postId"
+                params={{ postId: p.id }}
+                className="group relative block aspect-square overflow-hidden rounded-xl bg-accent/40"
+              >
+                {p.image_url ? (
+                  <img
+                    src={p.image_url}
+                    alt={p.title ?? "Beitrag"}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center p-2 text-center text-xs text-muted-foreground">
+                    {p.title ?? "Beitrag"}
+                  </div>
+                )}
+                {p.author_username && (
+                  <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white">
+                    @{p.author_username}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
+

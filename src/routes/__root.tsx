@@ -3,6 +3,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsent } from "@/components/CookieConsent";
 
 function NotFoundComponent() {
   return (
@@ -109,6 +110,7 @@ function RootComponent() {
         <Outlet />
       </div>
       <Toaster theme="dark" />
+      <CookieConsent />
     </AuthProvider>
   );
 }

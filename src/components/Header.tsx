@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, Users, Plus, LogOut, User as UserIcon, MessageCircleQuestion } from "lucide-react";
+import { Search, Users, Plus, LogOut, User as UserIcon, MessageCircleQuestion, Calendar, Rocket } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -74,11 +74,27 @@ export function Header() {
           </Link>
 
           <Link
+            to="/events"
+            className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <Calendar className="h-4 w-4" />
+            <span className="hidden sm:inline">Events</span>
+          </Link>
+
+          <Link
             to="/communities"
             className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Community</span>
+          </Link>
+
+          <Link
+            to="/waitlist"
+            className="flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-2 text-sm font-medium text-yellow-300 transition-colors hover:bg-yellow-400/20 hover:text-yellow-200"
+          >
+            <Rocket className="h-4 w-4" />
+            <span className="hidden sm:inline">Waitlist</span>
           </Link>
 
           {user ? (

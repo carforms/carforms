@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon_name: string
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+          sort_order: number
+          threshold_type: string | null
+          threshold_value: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          icon_name: string
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          threshold_type?: string | null
+          threshold_value?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon_name?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          threshold_type?: string | null
+          threshold_value?: number | null
+        }
+        Relationships: []
+      }
       communities: {
         Row: {
           cover_url: string | null
@@ -533,10 +575,16 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          car_make: string | null
+          car_model: string | null
           created_at: string
           display_name: string | null
           id: string
+          interests: string[]
           location: string | null
+          onboarding_completed_at: string | null
+          onboarding_dismissed_at: string | null
+          pinned_badge_id: string | null
           updated_at: string
           username: string
           verified: boolean
@@ -544,10 +592,16 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          car_make?: string | null
+          car_model?: string | null
           created_at?: string
           display_name?: string | null
           id: string
+          interests?: string[]
           location?: string | null
+          onboarding_completed_at?: string | null
+          onboarding_dismissed_at?: string | null
+          pinned_badge_id?: string | null
           updated_at?: string
           username: string
           verified?: boolean
@@ -555,15 +609,29 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          car_make?: string | null
+          car_model?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
+          interests?: string[]
           location?: string | null
+          onboarding_completed_at?: string | null
+          onboarding_dismissed_at?: string | null
+          pinned_badge_id?: string | null
           updated_at?: string
           username?: string
           verified?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_pinned_badge_id_fkey"
+            columns: ["pinned_badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppressed_emails: {
         Row: {
@@ -589,6 +657,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -607,15 +701,53 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_signups: {
+        Row: {
+          account_type: string
+          company_name: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          marketing_consent: boolean
+          privacy_consent: boolean
+          role: string[]
+        }
+        Insert: {
+          account_type: string
+          company_name?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          marketing_consent?: boolean
+          privacy_consent: boolean
+          role: string[]
+        }
+        Update: {
+          account_type?: string
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          marketing_consent?: boolean
+          privacy_consent?: boolean
+          role?: string[]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      award_badges_for_user: { Args: { _user_id: string }; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number

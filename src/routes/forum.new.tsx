@@ -37,12 +37,31 @@ function NewQuestionPage() {
   }, [authLoading, user, navigate]);
 
   useEffect(() => {
-    supabase
-      .from("communities")
-      .select("id,slug,name")
-      .order("name", { ascending: true })
-      .then(({ data }) => setCommunities((data as Community[]) ?? []));
-  }, []);
+    if (!user) return;
+    (async () => {
+      // Only communities the user can post to (member or owner) — matches the
+      // INSERT policy on forum_questions so the dropdown never offers a
+      // community that would be rejected by RLS.
+      const [{ data: memberRows }, { data: ownedRows }] = await Promise.all([
+        supabase
+          .from("community_members")
+          .select("communities:community_id(id,slug,name)")
+          .eq("user_id", user.id),
+        supabase
+          .from("communities")
+          .select("id,slug,name")
+          .eq("created_by", user.id),
+      ]);
+      const map = new Map<string, Community>();
+      for (const row of (memberRows ?? []) as Array<{ communities: Community | null }>) {
+        if (row.communities) map.set(row.communities.id, row.communities);
+      }
+      for (const c of (ownedRows ?? []) as Community[]) map.set(c.id, c);
+      setCommunities(
+        Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    })();
+  }, [user]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,7 +117,16 @@ function NewQuestionPage() {
       .single();
     setBusy(false);
     if (error || !inserted) {
-      toast.error(toUserMessage(error));
+      const raw = (error?.message ?? "").toLowerCase();
+      if (raw.includes("row-level security") || raw.includes("violates")) {
+        toast.error(
+          communityId
+            ? "Du kannst nur in Communities posten, in denen du Mitglied bist."
+            : "Aktion nicht erlaubt. Bitte melde dich neu an.",
+        );
+      } else {
+        toast.error(toUserMessage(error));
+      }
       return;
     }
     toast.success("Frage veröffentlicht");
@@ -146,17 +174,24 @@ function NewQuestionPage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">Community (optional)</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              Community (optional)
+            </label>
             <select
               value={communityId}
               onChange={(e) => setCommunityId(e.target.value)}
               className="h-11 w-full rounded-xl border border-border/60 bg-card/60 px-3 text-sm outline-none focus:border-border"
             >
-              <option value="">Keine</option>
+              <option value="">Öffentlich (alle sehen es)</option>
               {communities.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
+            {communities.length === 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Du bist noch in keiner Community — deine Frage wird öffentlich gepostet.
+              </p>
+            )}
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-muted-foreground">Tags (Komma-getrennt)</label>
